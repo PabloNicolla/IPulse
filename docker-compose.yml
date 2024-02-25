@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  nodejs-backend:
+    build:
+      context: ./nodejs-backend
+    volumes:
+      - ./nodejs-backend:/usr/src/app
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  cpp-image-processing:
+    build:
+      context: ./cpp-image-processing
+    volumes:
+      - ./cpp-image-processing:/usr/src/app/code
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - nodejs-backend
+      - cpp-image-processing
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
