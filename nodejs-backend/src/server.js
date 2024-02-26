@@ -11,12 +11,18 @@ const clientSessions = require("client-sessions");
 const ejs = require("ejs");
 
 const app = express();
-const port = 8080;
+const HTTP_PORT = process.env.PORT || 8080;
 
 /* --- --- --- --- MIDDLEWARE --- --- --- --- */
+
+app.use(express.static("public"));
+
 /* --- Cookies --- */
 /* --- --- --- --- MULTER & CLOUDINARY --- --- --- --- */
 /* --- --- --- --- ENGINE --- --- --- --- */
+
+app.set("view engine", "ejs");
+
 /* --- --- --- --- GET --- --- --- --- */
 
 app.get("/", (req, res) => {
@@ -24,7 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/homepage", (req, res) => {
-  res.send("Hello World");
+  res.render("homepage", { title: "Home Page" });
 });
 
 app.get("/login", (req, res) => {
@@ -56,7 +62,7 @@ app.get("/search", (req, res) => {
 });
 
 app.get("/about%20us", (req, res) => {
-  res.send("about us page");
+  res.render("about_us", { title: "About Us" });
 });
 
 app.get("/terms%20of%20service", (req, res) => {
@@ -71,6 +77,6 @@ app.get("/privacy%20policy", (req, res) => {
 /* --- --- --- --- 404 --- --- --- --- */
 /* --- --- --- --- Server Start --- --- --- --- */
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.listen(HTTP_PORT, () => {
+  console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
 });

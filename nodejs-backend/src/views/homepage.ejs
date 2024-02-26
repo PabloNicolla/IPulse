@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <%- include('partials/header') -%>
+    <!-- Page specific content goes here -->
+    <!-- search bar -->
+    <div class="flex justify-center p-8">
+      <div class="max-w-xl w-full">
+        <label class="input input-bordered flex items-center gap-2 w-full">
+          <input type="text" class="grow" placeholder="Search" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            class="w-4 h-4 opacity-70"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </label>
+      </div>
+    </div>
+
+    <!-- carousel -->
+    <div class="flex justify-center">
+      <div class="w-64 carousel rounded-box md:hidden">
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1559703248-dcaaec9fab78.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1565098772267-60af42b81ef2.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1572635148818-ef6fd45eb394.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1494253109108-2e30c049369b.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1550258987-190a2d41a8ba.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1559181567-c3190ca9959b.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+        <div class="carousel-item w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1601004890684-d8cbf643f5f2.jpg"
+            class="w-full"
+            alt="Tailwind CSS Carousel component"
+          />
+        </div>
+      </div>
+
+      <div class="carousel w-full hidden md:flex">
+        <div id="slide1" class="carousel-item relative w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.jpg"
+            class="w-full"
+          />
+          <div
+            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+          >
+            <a href="#slide4" class="btn btn-circle">❮</a>
+            <a href="#slide2" class="btn btn-circle">❯</a>
+          </div>
+        </div>
+        <div id="slide2" class="carousel-item relative w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1609621838510-5ad474b7d25d.jpg"
+            class="w-full"
+          />
+          <div
+            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+          >
+            <a href="#slide1" class="btn btn-circle">❮</a>
+            <a href="#slide3" class="btn btn-circle">❯</a>
+          </div>
+        </div>
+        <div id="slide3" class="carousel-item relative w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1414694762283-acccc27bca85.jpg"
+            class="w-full"
+          />
+          <div
+            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+          >
+            <a href="#slide2" class="btn btn-circle">❮</a>
+            <a href="#slide4" class="btn btn-circle">❯</a>
+          </div>
+        </div>
+        <div id="slide4" class="carousel-item relative w-full">
+          <img
+            src="https://daisyui.com/images/stock/photo-1665553365602-b2fb8e5d1707.jpg"
+            class="w-full"
+          />
+          <div
+            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+          >
+            <a href="#slide3" class="btn btn-circle">❮</a>
+            <a href="#slide1" class="btn btn-circle">❯</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="flex justify-center p-8">
+      <div class="join join-vertical xl:join-horizontal">
+        <div class="flex p-4">
+          <div class="card w-96 bg-base-200 shadow-xl">
+            <figure>
+              <img
+                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+                alt="Shoes"
+              />
+            </figure>
+            <div class="card-body">
+              <h2 class="card-title">
+                Shoes!
+                <div class="badge badge-secondary">NEW</div>
+              </h2>
+              <p>If a dog chews shoes whose shoes does he choose?</p>
+              <div class="card-actions justify-end">
+                <div class="badge badge-outline">Fashion</div>
+                <div class="badge badge-outline">Products</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex p-4">
+          <div class="card w-96 bg-base-200 shadow-xl">
+            <figure>
+              <img
+                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+                alt="Shoes"
+              />
+            </figure>
+            <div class="card-body">
+              <h2 class="card-title">
+                Shoes!
+                <div class="badge badge-secondary">NEW</div>
+              </h2>
+              <p>If a dog chews shoes whose shoes does he choose?</p>
+              <div class="card-actions justify-end">
+                <div class="badge badge-outline">Fashion</div>
+                <div class="badge badge-outline">Products</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex p-4">
+          <div class="card w-96 bg-base-200 shadow-xl">
+            <figure>
+              <img
+                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+                alt="Shoes"
+              />
+            </figure>
+            <div class="card-body">
+              <h2 class="card-title">
+                Shoes!
+                <div class="badge badge-secondary">NEW</div>
+              </h2>
+              <p>If a dog chews shoes whose shoes does he choose?</p>
+              <div class="card-actions justify-end">
+                <div class="badge badge-outline">Fashion</div>
+                <div class="badge badge-outline">Products</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') -%>
+  </body>
+</html>

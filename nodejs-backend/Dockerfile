@@ -14,4 +14,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 8080
-CMD [ "node", "src/app.js" ] # Update this to your app's main file
+CMD [ "node", "src/server.js" ]
