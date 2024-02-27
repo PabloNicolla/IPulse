@@ -1,37 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
   </head>
   <body>
-    <%- include('partials/header') -%>
+    <%- include('partials/header', {user: user}) %>
     <!-- Page specific content goes here -->
+
     <!-- search bar -->
     <div class="flex justify-center p-8">
-      <div class="max-w-xl w-full">
-        <label class="input input-bordered flex items-center gap-2 w-full">
-          <input type="text" class="grow" placeholder="Search" />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            class="w-4 h-4 opacity-70"
+      <div class="form-control w-full max-w-xl">
+        <div class="input-group flex">
+          <input
+            type="text"
+            placeholder="Search…"
+            class="input input-bordered w-full flex-grow bg-base-200 text-primary"
+            id="search-input"
+          />
+
+          <button
+            id="search-button"
+            class="btn btn-square flex-shrink-0 bg-primary text-primary-content hover:bg-primary-content hover:text-primary"
           >
-            <path
-              fill-rule="evenodd"
-              d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </label>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          id="search-dropdown"
+          class="dropdown hidden w-full bg-base-100 text-primary shadow-lg"
+        ></div>
       </div>
     </div>
 
     <!-- carousel -->
     <div class="flex justify-center">
-      <div class="w-64 carousel rounded-box md:hidden">
+      <div class="carousel w-64 rounded-box md:hidden">
         <div class="carousel-item w-full">
           <img
             src="https://daisyui.com/images/stock/photo-1559703248-dcaaec9fab78.jpg"
@@ -83,14 +103,14 @@
         </div>
       </div>
 
-      <div class="carousel w-full hidden md:flex">
+      <div class="carousel hidden w-full md:flex">
         <div id="slide1" class="carousel-item relative w-full">
           <img
             src="https://daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.jpg"
             class="w-full"
           />
           <div
-            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+            class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between"
           >
             <a href="#slide4" class="btn btn-circle">❮</a>
             <a href="#slide2" class="btn btn-circle">❯</a>
@@ -102,7 +122,7 @@
             class="w-full"
           />
           <div
-            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+            class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between"
           >
             <a href="#slide1" class="btn btn-circle">❮</a>
             <a href="#slide3" class="btn btn-circle">❯</a>
@@ -114,7 +134,7 @@
             class="w-full"
           />
           <div
-            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+            class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between"
           >
             <a href="#slide2" class="btn btn-circle">❮</a>
             <a href="#slide4" class="btn btn-circle">❯</a>
@@ -126,7 +146,7 @@
             class="w-full"
           />
           <div
-            class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2"
+            class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between"
           >
             <a href="#slide3" class="btn btn-circle">❮</a>
             <a href="#slide1" class="btn btn-circle">❯</a>
@@ -136,74 +156,34 @@
     </div>
 
     <!-- Cards -->
-    <div class="flex justify-center p-8">
-      <div class="join join-vertical xl:join-horizontal">
-        <div class="flex p-4">
-          <div class="card w-96 bg-base-200 shadow-xl">
-            <figure>
-              <img
-                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
-                alt="Shoes"
-              />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">
-                Shoes!
-                <div class="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div class="card-actions justify-end">
-                <div class="badge badge-outline">Fashion</div>
-                <div class="badge badge-outline">Products</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex p-4">
-          <div class="card w-96 bg-base-200 shadow-xl">
-            <figure>
-              <img
-                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
-                alt="Shoes"
-              />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">
-                Shoes!
-                <div class="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div class="card-actions justify-end">
-                <div class="badge badge-outline">Fashion</div>
-                <div class="badge badge-outline">Products</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex p-4">
-          <div class="card w-96 bg-base-200 shadow-xl">
-            <figure>
-              <img
-                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
-                alt="Shoes"
-              />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">
-                Shoes!
-                <div class="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div class="card-actions justify-end">
-                <div class="badge badge-outline">Fashion</div>
-                <div class="badge badge-outline">Products</div>
-              </div>
+    <div class="flex flex-wrap justify-center p-8">
+      <% cards.forEach(function(card, index) { %> <% if (index < 12) { %>
+      <!-- Check to ensure only 12 cards are rendered -->
+      <div class="flex p-4">
+        <div class="card w-96 bg-base-200 shadow-xl">
+          <figure>
+            <img src="<%= card.imgSrc %>" alt="Card Image" />
+          </figure>
+          <div class="card-body">
+            <h2 class="card-title">
+              <%= card.title %>
+              <div class="badge badge-secondary">NEW</div>
+            </h2>
+            <p><%= card.description %></p>
+            <div class="card-actions justify-end">
+              <% card.badges.forEach(function(badge) { %>
+              <div class="badge badge-outline"><%= badge %></div>
+              <% }); %>
             </div>
           </div>
         </div>
       </div>
+      <% } %> <% }); %>
     </div>
 
-    <%- include('partials/footer') -%>
+    <%- include('partials/footer') %>
+
+    <script type="module" src="js/search-form.js"></script>
+    <script type="module" src="js/search-recommendations.js"></script>
   </body>
 </html>

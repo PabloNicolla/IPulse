@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include('partials/header', {user: user}) %>
+    <div class="flex min-h-screen items-center justify-center bg-base-100">
+      <div class="card w-full max-w-md bg-base-200 shadow-2xl">
+        <div class="card-body">
+          <h2 class="card-title text-center">Register</h2>
+          <form method="POST" action="/register">
+            <div class="form-control">
+              <label class="label" for="email">
+                <span class="label-text">Email Address</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Your email"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control">
+              <label class="label" for="username">
+                <span class="label-text">User Name</span>
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Your username"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control">
+              <label class="label" for="password">
+                <span class="label-text">Password</span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Your password"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control">
+              <label class="label" for="confirm-password">
+                <span class="label-text">Confirm Password</span>
+              </label>
+              <input
+                type="password"
+                id="confirm-password"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control mt-6">
+              <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

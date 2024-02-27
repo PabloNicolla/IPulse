@@ -2,3 +2,5 @@ node_modules/
 .vscode/
 containers-tutorial.md
 output.css
+.prettierrc
+*.png

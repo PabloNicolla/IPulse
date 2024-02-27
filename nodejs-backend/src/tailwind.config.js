@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  content: ["./views/**/*.ejs", "./public/**/*.html", "./public/**/*.js"],
   purge: ["./views/**/*.ejs", "./public/**/*.html", "./public/**/*.js"],
   darkMode: "media", // or 'media' or 'class'
   theme: {
@@ -21,23 +22,3 @@ module.exports = {
 
   plugins: [require("daisyui")],
 };
-
-/*
-daisyui: {
-    themes: [
-      {
-        mytheme: {
-          primary: "#be00ff",
-          secondary: "#ddb900",
-          accent: "#00b300",
-          neutral: "#302016",
-          "base-100": "#2c1d36",
-          info: "#0081e5",
-          success: "#00ae77",
-          warning: "#ffba00",
-          error: "#d5004b",
-        },
-      },
-    ],
-  },
-*/

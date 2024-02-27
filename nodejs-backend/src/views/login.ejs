@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link href="/css/output.css" rel="stylesheet" />
+      <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+      <title><%= title %></title>
+    </head>
+    <body>
+      <%- include('partials/header', {user: user}) %>
+
+      <div class="flex justify-center">
+        <div class="hero min-h-screen w-full bg-base-100">
+          <div class="flex max-w-5xl">
+            <div class="hero-content flex-col lg:flex-row-reverse">
+              <div class="text-center lg:text-left">
+                <h1 class="text-5xl font-bold">Login now!</h1>
+                <p class="py-6">
+                  Provident cupiditate voluptatem et in. Quaerat fugiat ut
+                  assumenda excepturi exercitationem quasi. In deleniti eaque
+                  aut repudiandae et a id nisi.
+                </p>
+              </div>
+              <div class="card w-full max-w-sm shrink-0 bg-base-300 shadow-2xl">
+                <form class="card-body" method="post" action="/login">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="email"
+                      class="input input-bordered"
+                      required
+                    />
+                  </div>
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Password</span>
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="password"
+                      class="input input-bordered"
+                      required
+                    />
+                    <label class="label">
+                      <a href="#" class="link-hover link label-text-alt"
+                        >Forgot password?</a
+                      >
+                    </label>
+                  </div>
+                  <div class="form-control mt-6">
+                    <button class="btn btn-primary" type="submit">Login</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%- include('partials/footer') %>
+    </body>
+  </html>
+</html>
