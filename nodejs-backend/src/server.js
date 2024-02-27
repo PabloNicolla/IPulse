@@ -1,3 +1,134 @@
+const allCards = [
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  {
+    imgSrc:
+      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
+    title: "Title 1",
+    description: "Description 1",
+    badges: ["Fashion", "Products"],
+  },
+  // Add up to 12 card objects
+];
+// test
+
 // Core
 const express = require("express");
 const path = require("path");
@@ -162,10 +293,38 @@ app.get("/privacy%20policy", (req, res) => {
   res.send("privacy policy page");
 });
 
+app.get("/profile", (req, res) => {
+  res.send("privacy policy page");
+});
+
+app.get("/logout", function (req, res) {
+  // Destroy the session
+  res.session = null;
+  res.clearCookie("session");
+  res.redirect("/homepage");
+});
+
 /* --- --- --- --- GET search --- --- --- --- */
 
 app.get("/search", (req, res) => {
-  res.send("search page");
+  const itemsPerPage = 3;
+  let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+  const offset = (page - 1) * itemsPerPage;
+
+  // Assuming `allCards` is an array containing all your card data
+  const paginatedItems = allCards.slice(offset, offset + itemsPerPage);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(allCards.length / itemsPerPage);
+
+  res.render("search", {
+    title: "Search",
+    user: req.session.user,
+    cards: paginatedItems,
+    currentPage: page,
+    totalPages: totalPages,
+    cQuery: req.query.q,
+  });
 });
 
 app.get("/search/recommendations", (req, res) => {

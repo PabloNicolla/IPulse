@@ -5,7 +5,7 @@ function handleSubmit(searchTerm = searchInput.value) {
   const route = "/search"; // Replace with the correct route
 
   // Construct the URL with the search term
-  const searchURL = `${route}?query=${searchTerm}`;
+  const searchURL = `${route}?q=${searchTerm}`;
 
   // Redirect the user
   window.location.href = searchURL;
@@ -17,6 +17,8 @@ searchInput.addEventListener("keyup", function (event) {
   }
 });
 
-searchButton.addEventListener("click", handleSubmit);
+searchButton.addEventListener("click", () => {
+  handleSubmit();
+});
 
 export { handleSubmit };
