@@ -5,12 +5,21 @@ const bcrypt = require("bcryptjs");
 
 let Schema = mongoose.Schema;
 
-let userSchema = new Schema({
-  userName: { type: String, unique: true },
-  password: String,
-  email: String,
-  loginHistory: [{ dateTime: Date, userAgent: String }],
-});
+let userSchema = new Schema(
+  {
+    username: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true },
+    loginHistory: [{ dateTime: Date, userAgent: String }],
+    profile: {
+      firstName: { type: String, default: null },
+      lastName: { type: String, default: null },
+      bio: { type: String, default: null },
+      profilePicture: { type: String, default: null },
+    },
+  },
+  { timestamps: true },
+);
 
 let User;
 
@@ -32,7 +41,7 @@ module.exports.initialize = () => {
 
 module.exports.registerUser = (userData) => {
   return new Promise((resolve, reject) => {
-    if (userData.password !== userData.password2) {
+    if (userData.password !== userData.confirmPassword) {
       reject("Passwords do not match");
       return;
     }
@@ -64,26 +73,28 @@ module.exports.registerUser = (userData) => {
 
 module.exports.checkUser = (userData) => {
   return new Promise((resolve, reject) => {
-    User.find({ userName: userData.userName })
+    User.find({ username: userData.username })
       .exec()
       .then((users) => {
         if (users.length === 0) {
-          reject(`Unable to find user: ${userData.userName}`);
+          reject(`Unable to find user: ${userData.username}`);
           return;
         }
 
         bcrypt.compare(userData.password, users[0].password).then((result) => {
           if (result === false) {
-            reject(`Incorrect Password for user: ${userData.userName}`);
+            reject(`Incorrect Password for user: ${userData.username}`);
           } else {
-            users[0].loginHistory.push({
-              dateTime: new Date().toString(),
-              userAgent: userData.userAgent,
-            });
-
             User.updateOne(
-              { userName: users[0].userName },
-              { $set: { loginHistory: users[0].loginHistory } },
+              { username: users[0].username },
+              {
+                $push: {
+                  loginHistory: {
+                    dateTime: new Date().toString(),
+                    userAgent: userData.userAgent,
+                  },
+                },
+              },
             )
               .exec()
               .then(() => resolve(users[0]))
@@ -94,7 +105,7 @@ module.exports.checkUser = (userData) => {
         });
       })
       .catch((err) => {
-        reject(`Unable to find user: ${userData.userName}`);
+        reject(`Unable to find user: ${userData.username}`);
       });
   });
 };

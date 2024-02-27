@@ -12,39 +12,46 @@ const cookieParser = require("cookie-parser");
 const ejs = require("ejs");
 // Local
 const authService = require("./auth-service");
-
+// Core
 const app = express();
 const HTTP_PORT = process.env.PORT || 8080;
+const HTTPS_PORT = process.env.PORT || 8443;
 
 /* --- --- --- --- MIDDLEWARE --- --- --- --- */
 
 app.use(express.static("public"));
 app.use(express.json()); // For parsing application/json
 app.use(cookieParser()); // For handling cookies
+app.use(express.urlencoded({ extended: true })); // req.body when using POST requests with form data (x-www-form-urlencoded)
 
 /* --- Cookies --- */
 
-app.use((req, res, next) => {
-  if (!req.headers.cookie) {
-    // Assign a random user ID as a cookie if it doesn't exist
-    const userId = Math.floor(Math.random() * 10000); // Simple random user ID generator
-    res.cookie("userID", userId, {
-      maxAge: 900000,
-      httpOnly: true,
-      SameSite: "Strict",
-    });
-    console.log(`Set new user ID: ${userId}`);
+app.use(
+  clientSessions({
+    cookieName: "session",
+    secret: "o6LjQ5EVNC28ZgK64hDELM18ScpFQr",
+    duration: 2 * 60 * 1000,
+    activeDuration: 1000 * 60,
+  }),
+);
+
+app.use(function (req, res, next) {
+  res.locals.session = req.session;
+  if (!req.session.user) {
+    res.locals.user = null;
   } else {
-    // Log the user ID from the cookie
-    const cookieString = req.headers.cookie;
-    const userId = cookieString
-      .split("; ")
-      .find((row) => row.startsWith("userID="))
-      .split("=")[1];
-    console.log(`Existing user ID: ${userId}`);
+    res.locals.user = req.session.user;
   }
   next();
 });
+
+function ensureLogin(req, res, next) {
+  if (!req.session.user) {
+    res.redirect("/login");
+  } else {
+    next();
+  }
+}
 
 app.post("/set-theme", (req, res) => {
   const { theme } = req.body;
@@ -60,8 +67,6 @@ app.post("/set-theme", (req, res) => {
 /* --- --- --- --- ENGINE --- --- --- --- */
 
 app.set("view engine", "ejs");
-
-app.use(express.urlencoded({ extended: true })); // req.body when using POST requests with form data (x-www-form-urlencoded)
 
 /* --- --- --- --- GET --- --- --- --- */
 
@@ -99,38 +104,49 @@ app.get("/homepage", (req, res) => {
   // Limit the array to a maximum of 12 items
   const limitedCards = cards.slice(0, 12);
 
-  const user = { loggedIn: false, username: "JohnDoe" };
-
   res.render("homepage", {
     title: "Home Page",
     cards: limitedCards,
-    user: user,
-  }); // Assuming your EJS file is named 'homepage.ejs'
+    user: res.locals.user,
+  });
 });
 
 app.get("/login", (req, res) => {
-  const user = { loggedIn: false, username: "JohnDoe" };
-  res.render("login", { title: "Login", user: user });
+  if (req.session.user) {
+    res.redirect("/dashboard");
+  }
+  res.render("login", {
+    title: "Login",
+    user: req.session.user,
+    errorMessage: "",
+    username: "",
+  });
 });
 
 app.get("/register", (req, res) => {
-  const user = { loggedIn: false, username: "JohnDoe" };
-  res.render("register", { title: "Register", user: user });
+  if (req.session.user) {
+    res.redirect("/dashboard");
+  }
+  res.render("register", {
+    title: "Register",
+    user: req.session.user,
+    message: { type: "", text: "", username: "", email: "" },
+  });
 });
 
-app.get("/dashboard", (req, res) => {
+app.get("/dashboard", ensureLogin, (req, res) => {
   res.send("dashboard page");
 });
 
-app.get("/editor/image", (req, res) => {
+app.get("/editor/image", ensureLogin, (req, res) => {
   res.send("editor image page");
 });
 
-app.get("/blog", (req, res) => {
+app.get("/blog", ensureLogin, (req, res) => {
   res.send("blog page");
 });
 
-app.get("/editor/post", (req, res) => {
+app.get("/editor/post", ensureLogin, (req, res) => {
   res.send("editor post page");
 });
 
@@ -163,11 +179,56 @@ app.get("/search/recommendations", (req, res) => {
 /* --- --- --- --- POST --- --- --- --- */
 
 app.post("/login", (req, res) => {
-  res.send("login page");
+  req.body.userAgent = req.get("User-Agent");
+
+  authService
+    .checkUser(req.body)
+    .then((user) => {
+      req.session.user = {
+        username: user.username,
+        email: user.email,
+        loginHistory: user.loginHistory,
+      };
+
+      res.redirect("/dashboard");
+    })
+    .catch((err) => {
+      res.render("login", {
+        title: "Login",
+        user: req.session.user,
+        errorMessage: err,
+        username: req.body.username,
+      });
+    });
 });
 
 app.post("/register", (req, res) => {
-  res.send("register page");
+  authService
+    .registerUser(req.body)
+    .then(() => {
+      res.render("register", {
+        title: "Register",
+        user: req.session.user,
+        message: {
+          type: "success",
+          text: "User created",
+          username: "",
+          email: "",
+        },
+      });
+    })
+    .catch((err) => {
+      res.render("register", {
+        title: "Register",
+        user: req.session.user,
+        message: {
+          type: "failure",
+          text: `${err}`,
+          username: req.body.username,
+          email: req.body.email,
+        },
+      });
+    });
 });
 
 /* --- --- --- --- 404 --- --- --- --- */

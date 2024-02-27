@@ -96,7 +96,7 @@
       </div>
     </button>
     <!-- Profile/Avatar -->
-    <% if (user.loggedIn) { %>
+    <% if (user) { %>
     <div class="dropdown dropdown-end">
       <div tabindex="0" role="button" class="avatar btn btn-circle btn-ghost">
         <div class="w-10 rounded-full">
@@ -127,4 +127,4 @@
   </div>
 </div>
 
-<script src="/js/theme-controller.js"></script>
+<script type="module" src="/js/theme-controller.js"></script>

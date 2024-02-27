@@ -31,3 +31,5 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
   });
 });
+
+export {};
