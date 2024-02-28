@@ -265,9 +265,29 @@ app.get("/register", (req, res) => {
   });
 });
 
-app.get("/dashboard", ensureLogin, (req, res) => {
-  res.send("dashboard page");
-});
+app.get(
+  "/dashboard",
+  /*ensureLogin,*/ (req, res) => {
+    const itemsPerPage = 3;
+    let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+    const offset = (page - 1) * itemsPerPage;
+
+    // Assuming `allCards` is an array containing all your card data
+    const paginatedItems = allCards.slice(offset, offset + itemsPerPage);
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(allCards.length / itemsPerPage);
+
+    res.render("dashboard", {
+      title: "dashboard",
+      user: req.session.user,
+      cards: paginatedItems,
+      currentPage: page,
+      totalPages: totalPages,
+      cQuery: req.query.q,
+    });
+  },
+);
 
 app.get("/editor/image", ensureLogin, (req, res) => {
   res.send("editor image page");
@@ -294,7 +314,7 @@ app.get("/privacy%20policy", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  res.send("privacy policy page");
+  res.send("profile page");
 });
 
 app.get("/logout", function (req, res) {
@@ -345,8 +365,6 @@ app.post("/login", (req, res) => {
     .then((user) => {
       req.session.user = {
         username: user.username,
-        email: user.email,
-        loginHistory: user.loginHistory,
       };
 
       res.redirect("/dashboard");
