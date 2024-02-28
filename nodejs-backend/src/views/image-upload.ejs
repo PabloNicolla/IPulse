@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include('partials/header', {user: user}) %>
+
+    <div class="flex min-h-screen items-center justify-center bg-base-100">
+      <div class="card w-full max-w-5xl bg-base-300 shadow-2xl">
+        <div class="card-body">
+          <h2 class="card-title text-center">Image Upload</h2>
+          <form
+            action="/image/upload"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <!-- Image Name -->
+            <div class="form-control">
+              <label class="label" for="imageName">
+                <span class="label-text">Image Name</span>
+              </label>
+              <input
+                type="text"
+                id="imageName"
+                name="imageName"
+                placeholder="Image Name"
+                class="input input-bordered"
+                required
+              />
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-control">
+              <label class="label" for="imageUpload">
+                <span class="label-text">Image Upload</span>
+              </label>
+              <input
+                type="file"
+                class="file-input file-input-bordered w-full max-w-xs"
+                id="imageUpload"
+                name="imageUpload"
+                required
+              />
+            </div>
+
+            <!-- Description -->
+            <div class="form-control">
+              <label class="label" for="description">
+                <span class="label-text">Description</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                placeholder="Image description"
+                class="textarea textarea-bordered"
+              ></textarea>
+            </div>
+
+            <!-- Flags -->
+            <div class="form-control">
+              <label class="label" for="flags">
+                <span class="label-text">Flags</span>
+              </label>
+              <input
+                type="text"
+                id="flags"
+                name="flags"
+                placeholder="e.g., sport, summer (comma separated)"
+                class="input input-bordered"
+              />
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-control mt-6">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

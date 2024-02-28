@@ -54,7 +54,9 @@
       <% cards.forEach(function(card, index) { %> <% if (index < 3) { %>
       <!-- Check to ensure only 12 cards are rendered -->
       <div class="flex p-4">
-        <div class="card w-96 bg-base-200 shadow-xl">
+        <div
+          class="card w-96 rounded-lg border border-base-content bg-base-300 shadow-xl"
+        >
           <figure>
             <img src="<%= card.imgSrc %>" alt="Card Image" />
           </figure>

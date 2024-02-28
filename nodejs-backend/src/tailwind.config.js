@@ -20,5 +20,5 @@ module.exports = {
     themeRoot: ":root", // The element that receives theme color CSS variables
   },
 
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"), require("@tailwindcss/forms")],
 };

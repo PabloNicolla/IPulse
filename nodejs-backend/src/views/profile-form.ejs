@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include('partials/header', {user: user}) %>
+
+    <div class="flex min-h-screen items-center justify-center bg-base-100">
+      <div class="card w-full max-w-5xl bg-base-300 shadow-2xl">
+        <div class="card-body">
+          <h2 class="card-title text-center">User Profile</h2>
+          <form
+            action="/user/profile"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <!-- First Name -->
+            <div class="form-control">
+              <label class="label" for="firstName">
+                <span class="label-text">First Name</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="First Name"
+                class="input input-bordered"
+                required
+              />
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-control">
+              <label class="label" for="lastName">
+                <span class="label-text">Last Name</span>
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                placeholder="Last Name"
+                class="input input-bordered"
+                required
+              />
+            </div>
+
+            <!-- Bio -->
+            <div class="form-control">
+              <label class="label" for="bio">
+                <span class="label-text">Bio</span>
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                placeholder="Short bio"
+                class="textarea textarea-bordered"
+              ></textarea>
+            </div>
+
+            <!-- Profile Picture Upload -->
+            <div class="form-control">
+              <label class="label" for="profilePicture">
+                <span class="label-text">Profile Picture</span>
+              </label>
+              <input
+                type="file"
+                id="profilePicture"
+                name="profilePicture"
+                class="file-input file-input-bordered w-full max-w-xs"
+                required
+              />
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-control mt-6">
+              <button type="submit" class="btn btn-primary">
+                Update Profile
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

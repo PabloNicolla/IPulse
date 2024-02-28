@@ -302,7 +302,7 @@ app.get("/editor/post", ensureLogin, (req, res) => {
 });
 
 app.get("/about%20us", (req, res) => {
-  res.render("about_us", { title: "About Us" });
+  res.render("about-us", { title: "About Us" });
 });
 
 app.get("/terms%20of%20service", (req, res) => {
@@ -313,8 +313,11 @@ app.get("/privacy%20policy", (req, res) => {
   res.send("privacy policy page");
 });
 
-app.get("/profile", (req, res) => {
-  res.send("profile page");
+app.get("/profile/update", (req, res) => {
+  res.render("profile-form", {
+    title: "Profile Update",
+    user: req.session.user,
+  });
 });
 
 app.get("/logout", function (req, res) {
@@ -322,6 +325,10 @@ app.get("/logout", function (req, res) {
   res.session = null;
   res.clearCookie("session");
   res.redirect("/homepage");
+});
+
+app.get("/image/upload", (req, res) => {
+  res.render("image-upload", { title: "Image Upload", user: req.session.user });
 });
 
 /* --- --- --- --- GET search --- --- --- --- */
