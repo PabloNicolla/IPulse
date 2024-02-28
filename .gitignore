@@ -4,3 +4,4 @@ containers-tutorial.md
 output.css
 .prettierrc
 *.png
+.env

@@ -143,6 +143,11 @@ const cookieParser = require("cookie-parser");
 const ejs = require("ejs");
 // Local
 const authService = require("./auth-service");
+const blogService = require("./blog-service");
+const imageService = require("./image-service");
+const mongooseInit = require("./mongoose-init");
+// Safety
+require("dotenv").config();
 // Core
 const app = express();
 const HTTP_PORT = process.env.PORT || 8080;
@@ -155,26 +160,25 @@ app.use(express.json()); // For parsing application/json
 app.use(cookieParser()); // For handling cookies
 app.use(express.urlencoded({ extended: true })); // req.body when using POST requests with form data (x-www-form-urlencoded)
 
-/* --- Cookies --- */
+/* --- --- --- --- COOKIES --- --- --- --- */
 
 app.use(
   clientSessions({
     cookieName: "session",
-    secret: "o6LjQ5EVNC28ZgK64hDELM18ScpFQr",
-    duration: 2 * 60 * 1000,
-    activeDuration: 1000 * 60,
+    secret: process.env.SESSION_SECRET,
+    duration: 10 * 60 * 1000,
+    activeDuration: 1000 * 60 * 5,
   }),
 );
 
-app.use(function (req, res, next) {
-  res.locals.session = req.session;
-  if (!req.session.user) {
-    res.locals.user = null;
-  } else {
-    res.locals.user = req.session.user;
-  }
-  next();
-});
+app.use(
+  clientSessions({
+    cookieName: "theme_session",
+    secret: process.env.SESSION_SECRET,
+    duration: 30 * 60 * 60 * 1000,
+    activeDuration: 60 * 60 * 1000,
+  }),
+);
 
 function ensureLogin(req, res, next) {
   if (!req.session.user) {
@@ -186,15 +190,21 @@ function ensureLogin(req, res, next) {
 
 app.post("/set-theme", (req, res) => {
   const { theme } = req.body;
-  // Set a cookie with the theme choice, with a max age of 30 days
-  res.cookie("theme", theme, {
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-  });
+  req.theme_session.theme = theme;
   res.status(200).send("Theme updated");
 });
 
 /* --- --- --- --- MULTER & CLOUDINARY --- --- --- --- */
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
+const upload = multer({ storage: multer.memoryStorage() });
+
 /* --- --- --- --- ENGINE --- --- --- --- */
 
 app.set("view engine", "ejs");
@@ -203,6 +213,11 @@ app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
   res.redirect("/homepage");
+});
+
+app.get("/get-theme", (req, res) => {
+  const theme = req.theme_session.theme || "light"; // Default to light theme if not set
+  res.json({ theme });
 });
 
 app.get("/homepage", (req, res) => {
@@ -238,7 +253,7 @@ app.get("/homepage", (req, res) => {
   res.render("homepage", {
     title: "Home Page",
     cards: limitedCards,
-    user: res.locals.user,
+    user: req.session.user,
   });
 });
 
@@ -372,6 +387,7 @@ app.post("/login", (req, res) => {
     .then((user) => {
       req.session.user = {
         username: user.username,
+        profilePicture: user.profile.profilePicture || null,
       };
 
       res.redirect("/dashboard");
@@ -415,6 +431,90 @@ app.post("/register", (req, res) => {
     });
 });
 
+app.post("/image/upload", upload.single("imageUpload"), (req, res) => {
+  let streamUpload = (req) => {
+    return new Promise((resolve, reject) => {
+      let stream = cloudinary.uploader.upload_stream(
+        { resource_type: "auto" },
+        (error, result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(error);
+          }
+        },
+      );
+
+      stream.end(req.file.buffer);
+    });
+  };
+
+  async function upload(req) {
+    let result = await streamUpload(req);
+    return result;
+  }
+
+  upload(req)
+    .then((uploaded) => {
+      req.body.storagePath = uploaded.url;
+      req.body.format = req.file.mimetype.split("/").pop();
+      req.body.creator = req.session.user.username;
+      if (req.body.tags) {
+        req.body.tags = req.body.tags.split(",");
+      } else {
+        req.body.tags = [];
+      }
+      delete req.body.imageUpload;
+      return imageService.addImage(req.body);
+    })
+    .then(() => {
+      res.redirect("/dashboard");
+    })
+    .catch((error) => {
+      // Handle possible upload errors
+      console.error("Upload failed", error);
+      res.status(500).send("An error occurred during file upload.");
+    });
+});
+
+app.post("/profile/update", upload.single("profilePicture"), (req, res) => {
+  let streamUpload = (req) => {
+    return new Promise((resolve, reject) => {
+      let stream = cloudinary.uploader.upload_stream(
+        { resource_type: "auto" },
+        (error, result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(error);
+          }
+        },
+      );
+
+      stream.end(req.file.buffer);
+    });
+  };
+
+  async function upload(req) {
+    let result = await streamUpload(req);
+    return result;
+  }
+
+  upload(req)
+    .then((uploaded) => {
+      req.body.profilePicture = uploaded.url;
+      return authService.updateUserProfile(req.session.user.username, req.body);
+    })
+    .then(() => {
+      res.redirect("/dashboard");
+    })
+    .catch((error) => {
+      // Handle possible upload errors
+      console.error("Upload failed", error);
+      res.status(500).send("An error occurred during file upload.");
+    });
+});
+
 /* --- --- --- --- 404 --- --- --- --- */
 
 app.use((req, res, next) => {
@@ -423,11 +523,14 @@ app.use((req, res, next) => {
 
 /* --- --- --- --- Server Start --- --- --- --- */
 
-authService.initialize().then(() => {
+(async () => {
+  await mongooseInit.initialize();
+  await authService.initialize();
+  await imageService.initialize();
   app.listen(HTTP_PORT, () => {
     console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
   });
-});
+})();
 
 // app.listen(HTTP_PORT, () => {
 //   console.log(`Example app listening at http://localhost:${HTTP_PORT}`);

@@ -10,7 +10,7 @@
   <body>
     <%- include('partials/header', {user: user}) %>
 
-    <div class="flex min-h-screen items-center justify-center bg-base-100">
+    <div class="my-24 flex items-center justify-center bg-base-100">
       <div class="card w-full max-w-5xl bg-base-300 shadow-2xl">
         <div class="card-body">
           <h2 class="card-title text-center">Image Upload</h2>
@@ -21,13 +21,13 @@
           >
             <!-- Image Name -->
             <div class="form-control">
-              <label class="label" for="imageName">
+              <label class="label" for="imageTitle">
                 <span class="label-text">Image Name</span>
               </label>
               <input
                 type="text"
-                id="imageName"
-                name="imageName"
+                id="imageTitle"
+                name="imageTitle"
                 placeholder="Image Name"
                 class="input input-bordered"
                 required
@@ -63,13 +63,13 @@
 
             <!-- Flags -->
             <div class="form-control">
-              <label class="label" for="flags">
-                <span class="label-text">Flags</span>
+              <label class="label" for="tags">
+                <span class="label-text">Tags</span>
               </label>
               <input
                 type="text"
-                id="flags"
-                name="flags"
+                id="tags"
+                name="tags"
                 placeholder="e.g., sport, summer (comma separated)"
                 class="input input-bordered"
               />

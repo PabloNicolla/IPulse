@@ -1,43 +1,17 @@
-//emuwR0Pwsw4v4F5o
-
-const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
-let Schema = mongoose.Schema;
-
-let userSchema = new Schema(
-  {
-    username: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
-    email: { type: String, required: true },
-    loginHistory: [{ dateTime: Date, userAgent: String }],
-    profile: {
-      firstName: { type: String, default: null },
-      lastName: { type: String, default: null },
-      bio: { type: String, default: null },
-      profilePicture: { type: String, default: null },
-    },
-  },
-  { timestamps: true },
-);
+const mongooseInit = require("./mongoose-init");
 
 let User;
 
 module.exports.initialize = () => {
-  return new Promise(function (resolve, reject) {
-    let db = mongoose.createConnection(
-      "mongodb+srv://pnicola:emuwR0Pwsw4v4F5o@blogcluster.ntvhqpu.mongodb.net/?retryWrites=true&w=majority&appName=BlogCluster",
-    );
+  User = mongooseInit.getModel("User");
 
-    db.on("error", (err) => {
-      reject(err);
-    });
-    db.once("open", () => {
-      User = db.model("users", userSchema);
-      resolve();
-    });
+  return new Promise((resolve, reject) => {
+    resolve();
   });
 };
+
+/* Create */
 
 module.exports.registerUser = (userData) => {
   return new Promise((resolve, reject) => {
@@ -70,6 +44,8 @@ module.exports.registerUser = (userData) => {
       });
   });
 };
+
+/* Read */
 
 module.exports.checkUser = (userData) => {
   return new Promise((resolve, reject) => {
@@ -107,5 +83,23 @@ module.exports.checkUser = (userData) => {
       .catch((err) => {
         reject(`Unable to find user: ${userData.username}`);
       });
+  });
+};
+
+/* Update */
+
+module.exports.updateUserProfile = (username, profileData) => {
+  return new Promise((resolve, reject) => {
+    let updateObject = {};
+    for (const [key, value] of Object.entries(profileData)) {
+      updateObject[`profile.${key}`] = value;
+    }
+
+    User.updateOne({ username }, { $set: updateObject })
+      .exec()
+      .then(() => resolve("User profile updated successfully."))
+      .catch((err) =>
+        reject(`There was an error updating the user profile: ${err}`),
+      );
   });
 };

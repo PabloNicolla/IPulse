@@ -94,10 +94,17 @@
     <div class="dropdown dropdown-end">
       <div tabindex="0" role="button" class="avatar btn btn-circle btn-ghost">
         <div class="w-10 rounded-full">
+          <% if (user.profilePicture) { %>
           <img
             alt="Tailwind CSS Navbar component"
-            src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+            src="<%= user.profilePicture %>"
           />
+          <% } else { %>
+          <img
+            alt="Tailwind CSS Navbar component"
+            src="images/default-profile.png"
+          />
+          <% } %>
         </div>
       </div>
       <ul

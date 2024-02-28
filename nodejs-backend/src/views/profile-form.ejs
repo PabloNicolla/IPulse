@@ -10,12 +10,12 @@
   <body>
     <%- include('partials/header', {user: user}) %>
 
-    <div class="flex min-h-screen items-center justify-center bg-base-100">
+    <div class="my-24 flex items-center justify-center bg-base-100">
       <div class="card w-full max-w-5xl bg-base-300 shadow-2xl">
         <div class="card-body">
           <h2 class="card-title text-center">User Profile</h2>
           <form
-            action="/user/profile"
+            action="/profile/update"
             method="POST"
             enctype="multipart/form-data"
           >
