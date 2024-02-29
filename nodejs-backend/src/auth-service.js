@@ -86,6 +86,15 @@ module.exports.checkUser = (userData) => {
   });
 };
 
+module.exports.getUserByUsername = (username) => {
+  return new Promise((resolve, reject) => {
+    User.findOne({ username: username })
+      .exec()
+      .then((user) => resolve(user))
+      .catch((err) => reject(`Unable to find user with username: ${username}`));
+  });
+};
+
 /* Update */
 
 module.exports.updateUserProfile = (username, profileData) => {

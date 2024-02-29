@@ -16,31 +16,11 @@ module.exports.initialize = () => {
 
 module.exports.addImage = (imageData) => {
   return new Promise((resolve, reject) => {
-    let getUser = (username) => {
-      return new Promise((resolve, reject) => {
-        User.findOne({ username: username })
-          .exec()
-          .then((user) => resolve(user))
-          .catch((err) =>
-            reject(`Unable to find user with username: ${username}`),
-          );
-      });
-    };
-
-    getUser(imageData.creator).then((user) => {
-      if (user) {
-        imageData.userId = user._id;
-        let newImage = new Image(imageData);
-        newImage
-          .save()
-          .then(() => resolve())
-          .catch((err) =>
-            reject(`There was an error creating the image: ${err}`),
-          );
-      } else {
-        reject(`Unable to find user with username: ${imageData.username}`);
-      }
-    });
+    let newImage = new Image(imageData);
+    newImage
+      .save()
+      .then(() => resolve())
+      .catch((err) => reject(`There was an error creating the image: ${err}`));
   });
 };
 
@@ -90,6 +70,15 @@ module.exports.deleteImage = (id) => {
       .exec()
       .then(() => resolve())
       .catch((err) => reject(`Unable to delete image: ${err}`));
+  });
+};
+
+module.exports.deleteImages = (idList) => {
+  return new Promise((resolve, reject) => {
+    Image.deleteMany({ _id: { $in: idList } })
+      .exec()
+      .then(() => resolve())
+      .catch((err) => reject(`Unable to delete images: ${err}`));
   });
 };
 

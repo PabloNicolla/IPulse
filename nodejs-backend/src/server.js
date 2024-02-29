@@ -205,6 +205,34 @@ cloudinary.config({
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    let stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+        if (result) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      },
+    );
+
+    stream.end(fileBuffer);
+  });
+};
+
+const cloudinaryUploadMiddleware = async (req, res, next) => {
+  try {
+    const uploaded = await uploadToCloudinary(req.file.buffer);
+    req.cloudinaryResult = uploaded; // Attach the result to the request object
+    next(); // Proceed to the next middleware or route handler
+  } catch (error) {
+    console.error("Upload failed", error);
+    res.status(500).send("An error occurred during file upload.");
+  }
+};
+
 /* --- --- --- --- ENGINE --- --- --- --- */
 
 app.set("view engine", "ejs");
@@ -283,24 +311,34 @@ app.get("/register", (req, res) => {
 app.get(
   "/dashboard",
   /*ensureLogin,*/ (req, res) => {
-    const itemsPerPage = 3;
-    let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
-    const offset = (page - 1) * itemsPerPage;
+    (async () => {
+      try {
+        const user = await authService.getUserByUsername(
+          req.session.user.username,
+        );
+        const userId = user._id; // Make sure `user` is not undefined before accessing `_id`
+        const images = await imageService.getImagesByUser(userId);
 
-    // Assuming `allCards` is an array containing all your card data
-    const paginatedItems = allCards.slice(offset, offset + itemsPerPage);
+        const itemsPerPage = 15;
+        let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+        const offset = (page - 1) * itemsPerPage;
 
-    // Calculate the total number of pages
-    const totalPages = Math.ceil(allCards.length / itemsPerPage);
+        const paginatedItems = images.slice(offset, offset + itemsPerPage);
+        const totalPages = Math.ceil(images.length / itemsPerPage);
 
-    res.render("dashboard", {
-      title: "dashboard",
-      user: req.session.user,
-      cards: paginatedItems,
-      currentPage: page,
-      totalPages: totalPages,
-      cQuery: req.query.q,
-    });
+        res.render("dashboard", {
+          title: "Dashboard",
+          user: req.session.user,
+          cards: paginatedItems,
+          currentPage: page,
+          totalPages: totalPages,
+          cQuery: req.query.q,
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard data", error);
+        res.status(500).send("An error occurred.");
+      }
+    })();
   },
 );
 
@@ -379,140 +417,114 @@ app.get("/search/recommendations", (req, res) => {
 
 /* --- --- --- --- POST --- --- --- --- */
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   req.body.userAgent = req.get("User-Agent");
 
-  authService
-    .checkUser(req.body)
-    .then((user) => {
-      req.session.user = {
-        username: user.username,
-        profilePicture: user.profile.profilePicture || null,
-      };
+  try {
+    const user = await authService.checkUser(req.body);
+    req.session.user = {
+      username: user.username,
+      profilePicture: user.profile.profilePicture || null,
+    };
 
-      res.redirect("/dashboard");
-    })
-    .catch((err) => {
-      res.render("login", {
-        title: "Login",
-        user: req.session.user,
-        errorMessage: err,
-        username: req.body.username,
-      });
+    res.redirect("/dashboard");
+  } catch (err) {
+    res.render("login", {
+      title: "Login",
+      user: req.session.user,
+      errorMessage: err,
+      username: req.body.username,
     });
-});
-
-app.post("/register", (req, res) => {
-  authService
-    .registerUser(req.body)
-    .then(() => {
-      res.render("register", {
-        title: "Register",
-        user: req.session.user,
-        message: {
-          type: "success",
-          text: "User created",
-          username: "",
-          email: "",
-        },
-      });
-    })
-    .catch((err) => {
-      res.render("register", {
-        title: "Register",
-        user: req.session.user,
-        message: {
-          type: "failure",
-          text: `${err}`,
-          username: req.body.username,
-          email: req.body.email,
-        },
-      });
-    });
-});
-
-app.post("/image/upload", upload.single("imageUpload"), (req, res) => {
-  let streamUpload = (req) => {
-    return new Promise((resolve, reject) => {
-      let stream = cloudinary.uploader.upload_stream(
-        { resource_type: "auto" },
-        (error, result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(error);
-          }
-        },
-      );
-
-      stream.end(req.file.buffer);
-    });
-  };
-
-  async function upload(req) {
-    let result = await streamUpload(req);
-    return result;
   }
+});
 
-  upload(req)
-    .then((uploaded) => {
+app.post("/register", async (req, res) => {
+  try {
+    await authService.registerUser(req.body);
+    res.render("register", {
+      title: "Register",
+      user: req.session.user,
+      message: {
+        type: "success",
+        text: "User created",
+        username: "",
+        email: "",
+      },
+    });
+  } catch (err) {
+    res.render("register", {
+      title: "Register",
+      user: req.session.user,
+      message: {
+        type: "failure",
+        text: `${err}`,
+        username: req.body.username,
+        email: req.body.email,
+      },
+    });
+  }
+});
+
+app.post(
+  "/image/upload",
+  upload.single("imageUpload"),
+  cloudinaryUploadMiddleware,
+  async (req, res) => {
+    try {
+      const uploaded = req.cloudinaryResult;
       req.body.storagePath = uploaded.url;
       req.body.format = req.file.mimetype.split("/").pop();
       req.body.creator = req.session.user.username;
-      if (req.body.tags) {
-        req.body.tags = req.body.tags.split(",");
-      } else {
-        req.body.tags = [];
-      }
+      req.body.tags = req.body.tags ? req.body.tags.split(",") : [];
       delete req.body.imageUpload;
-      return imageService.addImage(req.body);
-    })
-    .then(() => {
-      res.redirect("/dashboard");
-    })
-    .catch((error) => {
-      // Handle possible upload errors
-      console.error("Upload failed", error);
-      res.status(500).send("An error occurred during file upload.");
-    });
-});
 
-app.post("/profile/update", upload.single("profilePicture"), (req, res) => {
-  let streamUpload = (req) => {
-    return new Promise((resolve, reject) => {
-      let stream = cloudinary.uploader.upload_stream(
-        { resource_type: "auto" },
-        (error, result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(error);
-          }
-        },
+      const user = await authService.getUserByUsername(
+        req.session.user.username,
       );
+      req.body.userId = user._id;
 
-      stream.end(req.file.buffer);
-    });
-  };
-
-  async function upload(req) {
-    let result = await streamUpload(req);
-    return result;
-  }
-
-  upload(req)
-    .then((uploaded) => {
-      req.body.profilePicture = uploaded.url;
-      return authService.updateUserProfile(req.session.user.username, req.body);
-    })
-    .then(() => {
+      await imageService.addImage(req.body);
       res.redirect("/dashboard");
-    })
-    .catch((error) => {
-      // Handle possible upload errors
-      console.error("Upload failed", error);
-      res.status(500).send("An error occurred during file upload.");
-    });
+    } catch (error) {
+      console.error("Error adding image", error);
+      res.status(500).send("An error occurred.");
+    }
+  },
+);
+
+app.post(
+  "/profile/update",
+  upload.single("profilePicture"),
+  cloudinaryUploadMiddleware,
+  (req, res) => {
+    (async () => {
+      try {
+        const uploaded = req.cloudinaryResult;
+        req.body.profilePicture = uploaded.url;
+
+        await authService.updateUserProfile(
+          req.session.user.username,
+          req.body,
+        );
+        res.redirect("/dashboard");
+      } catch (error) {
+        console.error("Error updating profile", error);
+        res.status(500).send("An error occurred during profile update.");
+      }
+    })();
+  },
+);
+
+app.post("/delete/images", (req, res) => {
+  (async () => {
+    try {
+      await imageService.deleteImages(req.body.ids);
+      res.redirect("/dashboard");
+    } catch (error) {
+      console.error("Error deleting images", error);
+      res.status(500).send("An error occurred during image deletion.");
+    }
+  })();
 });
 
 /* --- --- --- --- 404 --- --- --- --- */
@@ -524,14 +536,14 @@ app.use((req, res, next) => {
 /* --- --- --- --- Server Start --- --- --- --- */
 
 (async () => {
-  await mongooseInit.initialize();
-  await authService.initialize();
-  await imageService.initialize();
-  app.listen(HTTP_PORT, () => {
-    console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
-  });
+  try {
+    await mongooseInit.initialize();
+    await authService.initialize();
+    await imageService.initialize();
+    app.listen(HTTP_PORT, () => {
+      console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
+    });
+  } catch (error) {
+    console.error("Error starting server", error);
+  }
 })();
-
-// app.listen(HTTP_PORT, () => {
-//   console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
-// });
