@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+      <div
+        class="drawer-content flex min-h-screen flex-col items-center justify-start"
+      >
+        <!-- Page content here -->
+        <%- include('partials/drawer-header', {user: user}) %>
+        <!-- Page specific content goes here -->
+
+        <%- include('partials/footer') %>
+      </div>
+      <div class="drawer-side z-50">
+        <label
+          for="my-drawer-2"
+          aria-label="close sidebar"
+          class="drawer-overlay"
+        ></label>
+        <ul class="menu min-h-full w-80 bg-base-200 p-4 text-base-content">
+          <!-- Sidebar content here -->
+
+          <div class="xl:hidden">
+            <li><a href="/homepage">Homepage</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/about%20us">About us</a></li>
+          </div>
+
+          <li>
+            <a href="/image/upload" class="btn btn-outline mt-8"
+              >Upload New Image</a
+            >
+          </li>
+          <li>
+            <button id="deleteSelected" class="btn btn-outline mt-4">
+              Delete Selected
+            </button>
+          </li>
+
+          <li>
+            <a onclick="checkAndShowModal()" class="btn btn-outline mt-4"
+              >Create new post</a
+            >
+          </li>
+          <li>
+            <a class="btn btn-outline mt-4">Edit Image</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

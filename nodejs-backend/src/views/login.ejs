@@ -11,9 +11,11 @@
     </head>
     <body>
       <%- include('partials/header', {user: user}) %>
+
+      <!-- Alert -->
+      <% if (errorMessage !== "") { %>
       <div class="flex justify-center py-8">
         <div class="w-full max-w-lg">
-          <% if (errorMessage !== "") { %>
           <div role="alert" class="alert alert-error">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -30,9 +32,9 @@
             </svg>
             <span><%= errorMessage %></span>
           </div>
-          <% } %>
         </div>
       </div>
+      <% } %>
 
       <div class="flex justify-center">
         <div class="hero min-h-screen w-full bg-base-100">

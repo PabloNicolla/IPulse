@@ -161,6 +161,97 @@
           </div>
         </div>
 
+        <!-- Modal -->
+        <div>
+          <dialog id="my_modal_2" class="modal">
+            <div class="modal-box">
+              <div class="flex items-center justify-center bg-base-100">
+                <div class="card w-full max-w-5xl bg-base-300 shadow-2xl">
+                  <div class="card-body">
+                    <h2 class="card-title text-center">Create Post</h2>
+                    <div>
+                      <div class="flex items-center gap-3">
+                        <div class="avatar">
+                          <div class="mask mask-squircle h-12 w-12">
+                            <img
+                              src="/images/default-profile.png"
+                              alt="Card Image"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div class="font-bold">tetete</div>
+                          <div class="badge badge-secondary">NEW</div>
+                        </div>
+                      </div>
+                    </div>
+                    <form action="/blog/publish" method="POST">
+                      <!-- Image Name -->
+                      <div class="form-control">
+                        <label class="label" for="title">
+                          <span class="label-text">Post Title</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="title"
+                          name="title"
+                          placeholder="Image Name"
+                          class="input input-bordered"
+                          required
+                        />
+                      </div>
+
+                      <!-- Content -->
+                      <div class="form-control">
+                        <label class="label" for="content">
+                          <span class="label-text">Post Content</span>
+                        </label>
+                        <textarea
+                          id="content"
+                          name="content"
+                          placeholder="Post content"
+                          class="textarea textarea-bordered"
+                        ></textarea>
+                      </div>
+
+                      <!-- Flags -->
+                      <div class="form-control">
+                        <label class="label" for="flags">
+                          <span class="label-text">Tags</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="flags"
+                          name="flags"
+                          placeholder="e.g., sport, summer (comma separated)"
+                          class="input input-bordered"
+                        />
+                      </div>
+
+                      <!-- Image ID -->
+                      <input
+                        type="hidden"
+                        id="image_id_form"
+                        name="featuredImage"
+                      />
+
+                      <!-- Submit Button -->
+                      <div class="form-control mt-6">
+                        <button type="submit" class="btn btn-primary">
+                          Submit
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
+        </div>
+
         <%- include('partials/footer') %>
       </div>
       <div class="drawer-side z-50">
@@ -190,14 +281,31 @@
             </button>
           </li>
 
-          <li><a class="btn btn-outline mt-4">Publish Selected</a></li>
-          <li><a class="btn btn-outline mt-4">Unpublish Selected</a></li>
+          <li>
+            <a onclick="checkAndShowModal()" class="btn btn-outline mt-4"
+              >Create new post</a
+            >
+          </li>
+          <li>
+            <form
+              id="editImageForm"
+              action="/image/editor"
+              method="POST"
+              class="hidden"
+            >
+              <input id="image_id_editor_form" name="image_id" type="hidden" />
+            </form>
+            <button id="editImageButton" class="btn btn-outline mt-4">
+              Edit Image
+            </button>
+          </li>
         </ul>
       </div>
     </div>
 
-    <script type="module" src="js/dashboard.js"></script>
-    <script type="module" src="js/search-recommendations.js"></script>
-    <script type="module" src="js/delete-images.js"></script>
+    <script type="module" src="/js/dashboard.js"></script>
+    <script type="module" src="/js/search-recommendations.js"></script>
+    <script type="module" src="/js/delete-images.js"></script>
+    <script type="module" src="/js/dashboard-forms.js"></script>
   </body>
 </html>

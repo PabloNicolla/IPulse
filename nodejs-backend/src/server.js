@@ -237,11 +237,101 @@ const cloudinaryUploadMiddleware = async (req, res, next) => {
 
 app.set("view engine", "ejs");
 
-/* --- --- --- --- GET --- --- --- --- */
+/* --- --- --- --- GET VIEWS --- --- --- --- */
 
 app.get("/", (req, res) => {
   res.redirect("/homepage");
 });
+
+app.get("/login", (req, res) => {
+  if (req.session.user) {
+    res.redirect("/dashboard");
+  }
+  res.render("login", {
+    title: "Login",
+    user: req.session.user,
+    errorMessage: "",
+    username: "",
+  });
+});
+
+app.get("/register", (req, res) => {
+  if (req.session.user) {
+    res.redirect("/dashboard");
+  }
+  res.render("register", {
+    title: "Register",
+    user: req.session.user,
+    message: { type: "", text: "", username: "", email: "" },
+  });
+});
+
+app.get("/dashboard", ensureLogin, (req, res) => {
+  (async () => {
+    try {
+      const user = await authService.getUserByUsername(
+        req.session.user.username,
+      );
+      const userId = user._id; // Make sure `user` is not undefined before accessing `_id`
+      const images = await imageService.getImagesByUser(userId);
+
+      const itemsPerPage = 15;
+      let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+      const offset = (page - 1) * itemsPerPage;
+
+      const paginatedItems = images.slice(offset, offset + itemsPerPage);
+      const totalPages = Math.ceil(images.length / itemsPerPage);
+
+      res.render("dashboard", {
+        title: "Dashboard",
+        user: req.session.user,
+        cards: paginatedItems,
+        currentPage: page,
+        totalPages: totalPages,
+        cQuery: req.query.q,
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data", error);
+      res.status(500).send("An error occurred.");
+    }
+  })();
+});
+
+app.get("/image/upload", ensureLogin, (req, res) => {
+  res.render("image-upload", { title: "Image Upload", user: req.session.user });
+});
+
+app.post("/image/editor", ensureLogin, (req, res) => {
+  (async () => {
+    try {
+      const image = await imageService.getImageById(req.body.imageId);
+      res.render("image-editor", {
+        title: "Image Editor",
+        user: req.session.user,
+        image: image,
+      });
+    } catch (error) {
+      console.error("Error fetching image", error);
+      res.status(500).send("An error occurred.");
+    }
+  })();
+});
+
+app.post("/profile/update", ensureLogin, (req, res) => {
+  res.render("profile-form", {
+    title: "Profile Update",
+    user: req.session.user,
+  });
+});
+
+app.get("/logout", ensureLogin, function (req, res) {
+  // Destroy the session
+  res.session = null;
+  res.clearCookie("session");
+  res.redirect("/homepage");
+});
+
+/* --- --- --- --- GET RESPONSES --- --- --- --- */
 
 app.get("/get-theme", (req, res) => {
   const theme = req.theme_session.theme || "light"; // Default to light theme if not set
@@ -285,67 +375,6 @@ app.get("/homepage", (req, res) => {
   });
 });
 
-app.get("/login", (req, res) => {
-  if (req.session.user) {
-    res.redirect("/dashboard");
-  }
-  res.render("login", {
-    title: "Login",
-    user: req.session.user,
-    errorMessage: "",
-    username: "",
-  });
-});
-
-app.get("/register", (req, res) => {
-  if (req.session.user) {
-    res.redirect("/dashboard");
-  }
-  res.render("register", {
-    title: "Register",
-    user: req.session.user,
-    message: { type: "", text: "", username: "", email: "" },
-  });
-});
-
-app.get(
-  "/dashboard",
-  /*ensureLogin,*/ (req, res) => {
-    (async () => {
-      try {
-        const user = await authService.getUserByUsername(
-          req.session.user.username,
-        );
-        const userId = user._id; // Make sure `user` is not undefined before accessing `_id`
-        const images = await imageService.getImagesByUser(userId);
-
-        const itemsPerPage = 15;
-        let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
-        const offset = (page - 1) * itemsPerPage;
-
-        const paginatedItems = images.slice(offset, offset + itemsPerPage);
-        const totalPages = Math.ceil(images.length / itemsPerPage);
-
-        res.render("dashboard", {
-          title: "Dashboard",
-          user: req.session.user,
-          cards: paginatedItems,
-          currentPage: page,
-          totalPages: totalPages,
-          cQuery: req.query.q,
-        });
-      } catch (error) {
-        console.error("Error fetching dashboard data", error);
-        res.status(500).send("An error occurred.");
-      }
-    })();
-  },
-);
-
-app.get("/editor/image", ensureLogin, (req, res) => {
-  res.send("editor image page");
-});
-
 app.get("/blog", ensureLogin, (req, res) => {
   res.send("blog page");
 });
@@ -364,24 +393,6 @@ app.get("/terms%20of%20service", (req, res) => {
 
 app.get("/privacy%20policy", (req, res) => {
   res.send("privacy policy page");
-});
-
-app.get("/profile/update", (req, res) => {
-  res.render("profile-form", {
-    title: "Profile Update",
-    user: req.session.user,
-  });
-});
-
-app.get("/logout", function (req, res) {
-  // Destroy the session
-  res.session = null;
-  res.clearCookie("session");
-  res.redirect("/homepage");
-});
-
-app.get("/image/upload", (req, res) => {
-  res.render("image-upload", { title: "Image Upload", user: req.session.user });
 });
 
 /* --- --- --- --- GET search --- --- --- --- */
@@ -506,6 +517,7 @@ app.post(
           req.session.user.username,
           req.body,
         );
+        req.session.user.profilePicture = uploaded.url;
         res.redirect("/dashboard");
       } catch (error) {
         console.error("Error updating profile", error);
@@ -525,6 +537,11 @@ app.post("/delete/images", (req, res) => {
       res.status(500).send("An error occurred during image deletion.");
     }
   })();
+});
+
+app.post("/blog/publish", (req, res) => {
+  console.log(req.body);
+  res.send("Blog post published");
 });
 
 /* --- --- --- --- 404 --- --- --- --- */
