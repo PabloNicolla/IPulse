@@ -4,13 +4,94 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/css/output.css" rel="stylesheet" />
-    <title><%= title ></title>
+    <title><%= title %></title>
   </head>
   <body>
     <%- include('partials/header', {user: user}) %>
-    <button class="btn btn-primary">One</button>
-    <button class="btn btn-secondary">Two</button>
-    <button class="btn btn-outline btn-accent">Three</button>
+
+    <div class="container mx-auto max-w-6xl px-4 py-8">
+      <div class="container mx-auto px-4 py-8">
+        <!-- Introduction Section -->
+        <div class="mb-10 text-center">
+          <h1 class="mb-4 text-4xl font-bold text-base-content">
+            About Our Blog Platform
+          </h1>
+          <p class="text-md text-base-content">
+            A space where creativity meets simplicity. Learn more about how we
+            make image blogging seamless and enjoyable.
+          </p>
+        </div>
+
+        <!-- Our Mission Card -->
+        <div class="card glass mx-auto mb-10 w-96">
+          <figure>
+            <img
+              src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+              alt="Our Mission"
+            />
+          </figure>
+          <div class="card-body">
+            <h2 class="card-title">Our Mission</h2>
+            <p>
+              To empower every individual to express their creativity through
+              photography and storytelling.
+            </p>
+            <div class="card-actions justify-end">
+              <button class="btn btn-primary">Discover More</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works - Steps -->
+        <div class="mb-10">
+          <h2 class="mb-6 text-center text-2xl font-bold">How It Works</h2>
+          <div class="flex justify-center">
+            <ul class="steps">
+              <li class="step step-primary">Register</li>
+              <li class="step step-primary">Upload Image</li>
+              <li class="step step-primary">Edit & Customize</li>
+              <li class="step">Share with the World</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mb-10 flex w-full flex-col">
+          <h2 class="mb-6 text-center text-2xl font-bold">Why Choose Us?</h2>
+          <div
+            class="card mb-4 grid h-20 place-items-center rounded-box bg-base-300"
+          >
+            Intuitive Image Editing
+          </div>
+          <div class="divider divider-primary"></div>
+          <div
+            class="card mb-4 grid h-20 place-items-center rounded-box bg-base-300"
+          >
+            Community Engagement
+          </div>
+          <div class="divider divider-primary"></div>
+          <div
+            class="card grid h-20 place-items-center rounded-box bg-base-300"
+          >
+            Creative Freedom
+          </div>
+        </div>
+
+        <!-- Steps for Mobile Users -->
+        <div class="mb-10">
+          <h2 class="mb-6 text-center text-2xl font-bold">Getting Started</h2>
+          <div class="flex justify-center">
+            <ul class="steps steps-vertical">
+              <li class="step step-primary">Register</li>
+              <li class="step step-primary">Choose Your Style</li>
+              <li class="step">Personalize Your Blog</li>
+              <li class="step">Become a Creator</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <%- include('partials/footer') %>
   </body>
 </html>

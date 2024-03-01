@@ -83,3 +83,12 @@ module.exports.deleteImages = (idList) => {
 };
 
 /* Update */
+
+module.exports.updateImage = (imageData) => {
+  return new Promise((resolve, reject) => {
+    Image.updateOne({ _id: imageData._id }, imageData)
+      .exec()
+      .then(() => resolve())
+      .catch((err) => reject(`Unable to update image: ${err}`));
+  });
+};

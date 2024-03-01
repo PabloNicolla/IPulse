@@ -15,7 +15,94 @@
       >
         <!-- Page content here -->
         <%- include('partials/drawer-header', {user: user}) %>
-        <!-- Page specific content goes here -->
+
+        <!-- Before and After view setup -->
+        <div
+          class="my-8 flex w-full flex-col items-center justify-center px-8 lg:flex-row"
+        >
+          <!-- Before -->
+          <div class="flex h-full">
+            <div class="card w-full bg-base-300 shadow-xl">
+              <div class="card-body">
+                <h2 class="card-title"><%= image.imageTitle %></h2>
+                <p><%= image.description %></p>
+                <div class="divider"></div>
+                <div class="flex justify-evenly">
+                  <% image.tags.forEach(function(badge) { %>
+                  <div class="badge badge-secondary"><%= badge %></div>
+                  <% }); %>
+                </div>
+              </div>
+              <figure>
+                <img src="<%= image.storagePath %>" alt="Image" />
+              </figure>
+            </div>
+          </div>
+          <div class="divider lg:divider-horizontal">TO</div>
+          <!-- After -->
+          <div class="flex h-full items-center justify-center">
+            <div class="card w-full bg-base-300 shadow-xl">
+              <form id="imageForm" class="card-body" method="post" action="">
+                <!-- Title Input -->
+                <input
+                  type="text"
+                  name="imageTitle"
+                  class="input input-bordered w-full max-w-xs"
+                  placeholder="New Title"
+                  value="<%= image.imageTitle %>"
+                />
+                <!-- Description Textarea -->
+                <textarea
+                  name="description"
+                  class="textarea textarea-bordered my-4 w-full"
+                  placeholder="New Description"
+                >
+<%= image.description %></textarea
+                >
+                <div class="divider"></div>
+                <!-- Tags Input -->
+                <input
+                  type="text"
+                  name="tags"
+                  class="input input-bordered w-full max-w-xs"
+                  placeholder="comma, separated, tags"
+                  value="<%= image.tags.join(', ') %>"
+                />
+                <!-- hidden image info -->
+                <input type="hidden" name="image_id" value="<%= image._id %>" />
+                <input
+                  type="hidden"
+                  name="storagePath"
+                  value="<%= image.storagePath %>"
+                />
+              </form>
+              <figure>
+                <img
+                  src="<%= image.storagePath %>"
+                  alt="Image"
+                  id="imageFormDisplay"
+                />
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        <div class="join flex justify-center">
+          <div class="my-8 flex pr-4">
+            <button id="SaveAsNewButton" class="btn btn-primary" type="button">
+              Save As New Image
+            </button>
+          </div>
+          <div class="my-8 flex pl-4">
+            <button
+              id="SaveChangesButton"
+              class="btn btn-primary"
+              type="button"
+            >
+              Save changes to original
+            </button>
+          </div>
+        </div>
 
         <%- include('partials/footer') %>
       </div>
@@ -36,26 +123,68 @@
           </div>
 
           <li>
-            <a href="/image/upload" class="btn btn-outline mt-8"
-              >Upload New Image</a
+            <a id="applyGrayscaleButton" class="btn btn-outline mt-8"
+              >Grayscale</a
             >
           </li>
           <li>
-            <button id="deleteSelected" class="btn btn-outline mt-4">
-              Delete Selected
-            </button>
-          </li>
-
-          <li>
-            <a onclick="checkAndShowModal()" class="btn btn-outline mt-4"
-              >Create new post</a
-            >
-          </li>
-          <li>
-            <a class="btn btn-outline mt-4">Edit Image</a>
+            <a id="applyinvertButton" class="btn btn-outline mt-8">Invert</a>
           </li>
         </ul>
       </div>
     </div>
+
+    <script>
+      localStorage.setItem("oImageId", "<%= image._id %>");
+
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const form = document.getElementById("imageForm");
+        document
+          .getElementById("SaveAsNewButton")
+          .addEventListener("click", function () {
+            form.action = "/image/editor/upload";
+            localStorage.setItem("oImageId", "");
+            form.submit(); // Submit the form after changing the action
+          });
+
+        document
+          .getElementById("SaveChangesButton")
+          .addEventListener("click", function () {
+            form.action = "/image/editor/update";
+            localStorage.setItem("oImageId", "");
+            form.submit(); // Submit the form after changing the action
+          });
+      });
+
+      document
+        .getElementById("applyGrayscaleButton")
+        .addEventListener("click", function () {
+          fetch("/your-grayscale-route", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // Any other headers your server requires
+            },
+            body: JSON.stringify({
+              image_id: document.LocalStorage.getItem("oImageId"),
+              // Include any other data your server might need
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.storagePath) {
+                // Assuming 'data' is the object returned by your server with the updated image info
+                document.getElementById("imageFormDisplay").src =
+                  data.storagePath;
+              } else {
+                // Handle any errors or unexpected responses
+                console.error("Failed to update the image");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+    </script>
   </body>
 </html>

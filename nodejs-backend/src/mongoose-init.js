@@ -27,6 +27,7 @@ let imageSchema = new mongoose.Schema(
     tags: [String],
     description: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    cloudinaryId: { type: String, required: true },
   },
   { timestamps: true },
 );

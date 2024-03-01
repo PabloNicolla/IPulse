@@ -166,7 +166,7 @@ app.use(
   clientSessions({
     cookieName: "session",
     secret: process.env.SESSION_SECRET,
-    duration: 10 * 60 * 1000,
+    duration: 30 * 60 * 1000,
     activeDuration: 1000 * 60 * 5,
   }),
 );
@@ -177,6 +177,15 @@ app.use(
     secret: process.env.SESSION_SECRET,
     duration: 30 * 60 * 60 * 1000,
     activeDuration: 60 * 60 * 1000,
+  }),
+);
+
+app.use(
+  clientSessions({
+    cookieName: "imageEditor",
+    secret: process.env.SESSION_SECRET,
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 60 * 1000,
   }),
 );
 
@@ -301,23 +310,15 @@ app.get("/image/upload", ensureLogin, (req, res) => {
   res.render("image-upload", { title: "Image Upload", user: req.session.user });
 });
 
-app.post("/image/editor", ensureLogin, (req, res) => {
-  (async () => {
-    try {
-      const image = await imageService.getImageById(req.body.imageId);
-      res.render("image-editor", {
-        title: "Image Editor",
-        user: req.session.user,
-        image: image,
-      });
-    } catch (error) {
-      console.error("Error fetching image", error);
-      res.status(500).send("An error occurred.");
-    }
-  })();
+app.get("/image/editor", ensureLogin, (req, res) => {
+  res.render("image-editor", {
+    title: "Image Editor",
+    user: req.session.user,
+    image: req.imageEditor.image,
+  });
 });
 
-app.post("/profile/update", ensureLogin, (req, res) => {
+app.get("/profile/update", ensureLogin, (req, res) => {
   res.render("profile-form", {
     title: "Profile Update",
     user: req.session.user,
@@ -384,15 +385,25 @@ app.get("/editor/post", ensureLogin, (req, res) => {
 });
 
 app.get("/about%20us", (req, res) => {
-  res.render("about-us", { title: "About Us" });
+  res.render("about-us", { title: "About Us", user: req.session.user });
 });
 
 app.get("/terms%20of%20service", (req, res) => {
-  res.send("terms of service page");
+  res.render("terms-of-service", {
+    title: "Terms of Service",
+    user: req.session.user,
+  });
 });
 
 app.get("/privacy%20policy", (req, res) => {
-  res.send("privacy policy page");
+  res.render("privacy-policy", {
+    title: "Privacy Policy",
+    user: req.session.user,
+  });
+});
+
+app.get("/support", (req, res) => {
+  res.render("support", { title: "Support", user: req.session.user });
 });
 
 /* --- --- --- --- GET search --- --- --- --- */
@@ -486,7 +497,10 @@ app.post(
       req.body.storagePath = uploaded.url;
       req.body.format = req.file.mimetype.split("/").pop();
       req.body.creator = req.session.user.username;
-      req.body.tags = req.body.tags ? req.body.tags.split(",") : [];
+      req.body.tags = req.body.tags
+        ? req.body.tags.split(",").map((tag) => tag.trim())
+        : [];
+      req.body.cloudinaryId = uploaded.public_id;
       delete req.body.imageUpload;
 
       const user = await authService.getUserByUsername(
@@ -502,6 +516,67 @@ app.post(
     }
   },
 );
+
+app.post("/image/editor", ensureLogin, (req, res) => {
+  (async () => {
+    try {
+      const image = await imageService.getImageById(req.body.image_id);
+      req.imageEditor.image = image;
+      res.redirect("/image/editor");
+    } catch (error) {
+      console.error("Error fetching image", error);
+      res.status(500).send("An error occurred.");
+    }
+  })();
+});
+
+app.post("/image/editor/upload", (req, res) => {
+  (async () => {
+    try {
+      const originalImage = await imageService.getImageById(req.body.image_id);
+      req.body.tags = req.body.tags.split(",").map((tag) => tag.trim());
+      const newImage = {
+        imageTitle: req.body.imageTitle,
+        description: req.body.description,
+        tags: req.body.tags[0] === "" ? [] : req.body.tags,
+        creator: req.session.user.username,
+        storagePath: req.body.storagePath,
+        format: originalImage.format,
+        userId: originalImage.userId,
+        cloudinaryId: originalImage.cloudinaryId,
+      };
+      await imageService.addImage(newImage);
+      res.redirect("/dashboard");
+    } catch (error) {
+      console.error("Error adding image", error);
+      res.status(500).send("An error occurred.");
+    }
+  })();
+});
+
+app.post("/image/editor/update", (req, res) => {
+  (async () => {
+    try {
+      const originalImage = await imageService.getImageById(req.body.image_id);
+      const newImage = {
+        _id: req.body.image_id,
+        imageTitle: req.body.imageTitle,
+        description: req.body.description,
+        tags: req.body.tags.split(",").map((tag) => tag.trim()) || [],
+        creator: req.session.user.username,
+        storagePath: req.body.storagePath,
+        format: originalImage.format,
+        userId: originalImage.userId,
+        cloudinaryId: originalImage.cloudinaryId,
+      };
+      await imageService.updateImage(newImage);
+      res.redirect("/dashboard");
+    } catch (error) {
+      console.error("Error updating image", error);
+      res.status(500).send("An error occurred.");
+    }
+  })();
+});
 
 app.post(
   "/profile/update",

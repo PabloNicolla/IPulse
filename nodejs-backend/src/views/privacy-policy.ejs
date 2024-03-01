@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/css/output.css" rel="stylesheet" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include('partials/header', {user: user}) %>
+
+    <div class="flex justify-center">
+      <div class="flex max-w-5xl bg-base-200 text-base-content">
+        <div class="container mx-auto max-w-4xl px-4 py-8">
+          <h1 class="mb-4 text-3xl font-bold">NovaBlog Privacy Policy</h1>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">Introduction</h2>
+          <p>
+            This Privacy Policy governs the collection, use, and protection of
+            your personal information on NovaBlog. We value your privacy and are
+            committed to being transparent about our data practices.
+          </p>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">
+            Information We Collect
+          </h2>
+          <ul class="list-disc space-y-2 pl-5">
+            <li>Email address</li>
+            <li>Username</li>
+            <li>Password (stored securely)</li>
+            <li>Images you upload</li>
+          </ul>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">
+            How We Use Your Information
+          </h2>
+          <ul class="list-disc space-y-2 pl-5">
+            <li>To create and manage your user account.</li>
+            <li>
+              To display uploaded images associated with your profile/blog
+              posts.
+            </li>
+            <li>To enable the login and authentication process.</li>
+            <li>
+              We may use your email address to send occasional updates about the
+              website.
+            </li>
+          </ul>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">
+            Data Storage and Security
+          </h2>
+          <p>
+            We store your information on secure servers and take reasonable
+            precautions to protect it from unauthorized access or disclosure.
+            Passwords are hashed and protected.
+          </p>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">Your Rights</h2>
+          <p>
+            You have the right to request access to the personal information we
+            hold about you. If inaccurate, you can request a correction. You may
+            also request that we delete your account and associated data by
+            contacting us.
+          </p>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">Cookies</h2>
+          <p>
+            We may use cookies to improve your website experience. Cookies are
+            small text files stored on your computer. You can control cookie
+            settings in your web browser.
+          </p>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">
+            Changes to this Policy
+          </h2>
+          <p>
+            We may update this Privacy Policy periodically. We will notify you
+            of significant changes with a notice on our website.
+          </p>
+
+          <h2 class="mb-2 mt-6 text-2xl font-semibold">Contact Us</h2>
+          <p>
+            If you have any privacy-related questions, please contact us at
+            test@test.test.
+          </p>
+        </div>
+      </div>
+    </div>
+    <%- include('partials/footer') %>
+  </body>
+</html>
