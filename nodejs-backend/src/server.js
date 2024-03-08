@@ -325,20 +325,6 @@ app.get("/profile/update", ensureLogin, (req, res) => {
   });
 });
 
-app.get("/logout", ensureLogin, function (req, res) {
-  // Destroy the session
-  res.session = null;
-  res.clearCookie("session");
-  res.redirect("/homepage");
-});
-
-/* --- --- --- --- GET RESPONSES --- --- --- --- */
-
-app.get("/get-theme", (req, res) => {
-  const theme = req.theme_session.theme || "light"; // Default to light theme if not set
-  res.json({ theme });
-});
-
 app.get("/homepage", (req, res) => {
   // Example array of card objects
   const cards = [
@@ -404,6 +390,20 @@ app.get("/privacy%20policy", (req, res) => {
 
 app.get("/support", (req, res) => {
   res.render("support", { title: "Support", user: req.session.user });
+});
+
+/* --- --- --- --- GET RESPONSES --- --- --- --- */
+
+app.get("/logout", ensureLogin, function (req, res) {
+  // Destroy the session
+  res.session = null;
+  res.clearCookie("session");
+  res.redirect("/homepage");
+});
+
+app.get("/get-theme", (req, res) => {
+  const theme = req.theme_session.theme || "light"; // Default to light theme if not set
+  res.json({ theme });
 });
 
 /* --- --- --- --- GET search --- --- --- --- */

@@ -5,3 +5,7 @@ output.css
 .prettierrc
 *.png
 .env
+VM-deploy.txt
+cpp-image-processing/libraries/
+cmake-help.txt
+build/
