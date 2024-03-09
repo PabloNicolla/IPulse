@@ -130,7 +130,7 @@
             <div class="join">
               <% if (currentPage - 1 > 1) {%>
               <a
-                href="/dashboard?q=<%= cQuery %>&page=1"
+                href="/users/dashboard?q=<%= cQuery %>&page=1"
                 class="bg:hover:bg-primary-content btn join-item bg-primary text-primary-content hover:text-primary"
                 ><%= 1 %></a
               >
@@ -143,7 +143,7 @@
               <% } %> <% for(let i = currentPage - 1; i <= currentPage + 1 && i
               <= totalPages; i++) { if (i < 1) continue; %>
               <a
-                href="/dashboard?q=<%= cQuery %>&page=<%= i %>"
+                href="/users/dashboard?q=<%= cQuery %>&page=<%= i %>"
                 class="<%= currentPage === i ? 'btn-active' : '' %> bg:hover:bg-primary-content btn join-item bg-primary text-primary-content hover:text-primary"
                 ><%= i %></a
               >
@@ -154,7 +154,7 @@
                 ...
               </button>
               <a
-                href="/dashboard?q=<%= cQuery %>&page=<%= totalPages %>"
+                href="/users/dashboard?q=<%= cQuery %>&page=<%= totalPages %>"
                 class="bg:hover:bg-primary-content btn join-item bg-primary text-primary-content hover:text-primary"
                 ><%= totalPages %></a
               >
@@ -267,7 +267,7 @@
 
           <div class="xl:hidden">
             <li><a href="/homepage">Homepage</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/users/dashboard">Dashboard</a></li>
             <li><a href="/blog">Blog</a></li>
             <li><a href="/about%20us">About us</a></li>
           </div>

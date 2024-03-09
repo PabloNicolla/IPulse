@@ -1,9 +1,7 @@
-#include <vector>
-#include <string>
 #include <iostream>
-#include <opencv2/opencv.hpp>
+#include <vector>
 #include "crow.h"
-#include "base64.h"
+#include "imageProcessor.h" // Include the header file for your ImageProcessor class
 
 // Middleware for setting CORS headers
 struct CorsMiddleware
@@ -33,56 +31,39 @@ int main()
   ([]()
    { return "Hello, world!"; });
 
-  CROW_ROUTE(app, "/test")
-  ([]()
-   {
-    crow::response res;
-    res.set_header("Content-Type", "text/plain");
-    res.body = "Test route";
-    return res; });
+  CROW_ROUTE(app, "/grayscale").methods("POST"_method)([](const crow::request &req)
+                                                       {
+    try {
+        crow::multipart::message msg(req);
+        auto imagePart = msg.get_part_by_name("image");
+        std::vector<uchar> data(imagePart.body.begin(), imagePart.body.end());
 
-  CROW_ROUTE(app, "/upload").methods("POST"_method)([](const crow::request &req)
+        auto processedData = ImageProcessor::processImage(data, ImageProcessor::Operation::Grayscale);
+
+        crow::response res;
+        res.set_header("Content-Type", "image/jpeg");
+        res.body = std::string(processedData.begin(), processedData.end());
+        return res;
+    } catch (const std::exception& e) {
+        return crow::response(400, e.what());
+    } });
+
+  CROW_ROUTE(app, "/invert").methods("POST"_method)([](const crow::request &req)
                                                     {
-    // Create a multipart message from the request
-    crow::multipart::message msg(req);
+    try {
+        crow::multipart::message msg(req);
+        auto imagePart = msg.get_part_by_name("image");
+        std::vector<uchar> data(imagePart.body.begin(), imagePart.body.end());
 
-    // Access the image part by name ("image")
-    auto imagePart = msg.get_part_by_name("image");
-    auto imageContent = imagePart.body;
+        auto processedData = ImageProcessor::processImage(data, ImageProcessor::Operation::Invert);
 
-    std::cout << "Received " << msg.parts.size() << " parts" << std::endl;
-    // std::cout << "Part names: ";
-    // for (const auto &part : msg.parts)
-    // {
-    //   std::cout << part.body << " ";
-    // }
-    
-    std::vector<uchar> data(imageContent.begin(), imageContent.end());
-    cv::Mat img = cv::imdecode(cv::Mat(data), cv::IMREAD_COLOR);
-
-    if (img.empty()) {
-      return crow::response(400, "Could not decode image");
-    }
-
-    // Convert the image to grayscale
-    cv::Mat grayImg;
-    cv::cvtColor(img, grayImg, cv::COLOR_BGR2GRAY);
-    
-    // Encode the grayscale image to JPEG
-    std::vector<uchar> encodedImg;
-    cv::imencode(".jpg", grayImg, encodedImg);
-
-    // Prepare the response to return the processed image
-    crow::response res;
-    res.set_header("Content-Type", "image/jpeg");
-
-    // Convert std::vector<uchar> to std::string to set as response body
-    std::string imageStr(encodedImg.begin(), encodedImg.end());
-
-    std::cout << "Processed image size: " << imageStr << std::endl;
-
-    res.body = imageStr;
-    return res; });
+        crow::response res;
+        res.set_header("Content-Type", "image/jpeg");
+        res.body = std::string(processedData.begin(), processedData.end());
+        return res;
+    } catch (const std::exception& e) {
+        return crow::response(400, e.what());
+    } });
 
   app.bindaddr("127.0.0.1").port(8081).multithreaded().run();
 }

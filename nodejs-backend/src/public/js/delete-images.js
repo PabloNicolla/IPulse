@@ -14,7 +14,7 @@ document
 
     if (selectedIds.length > 0) {
       // Send POST request with Fetch API
-      fetch("/delete/images", {
+      fetch("/image/delete/images", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

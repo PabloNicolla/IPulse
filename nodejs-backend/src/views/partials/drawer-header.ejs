@@ -32,7 +32,7 @@
     </div>
     <div class="hidden xl:flex">
       <a href="/homepage" class="btn btn-ghost">Homepage</a>
-      <a href="/dashboard" class="btn btn-ghost">Dashboard</a>
+      <a href="/users/dashboard" class="btn btn-ghost">Dashboard</a>
       <a href="/blog" class="btn btn-ghost">Blog</a>
       <a href="/about%20us" class="btn btn-ghost">About us</a>
     </div>
@@ -112,17 +112,17 @@
         class="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-300 p-2 shadow"
       >
         <li>
-          <a href="/profile/update">
+          <a href="/users/profile/update">
             Profile
             <!-- <span class="badge">New</span> -->
           </a>
         </li>
-        <li><a href="/logout">Logout</a></li>
+        <li><a href="/users/logout">Logout</a></li>
       </ul>
     </div>
     <% } else { %>
-    <a href="/login" class="btn btn-ghost">Login</a>
-    <a href="/register" class="btn btn-ghost">Register</a>
+    <a href="/users/login" class="btn btn-ghost">Login</a>
+    <a href="/users/register" class="btn btn-ghost">Register</a>
     <% } %>
   </div>
 </div>

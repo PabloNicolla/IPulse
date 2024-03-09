@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const evnConfig = require("./config/index");
 
 let userSchema = new mongoose.Schema(
   {
@@ -59,7 +60,7 @@ let Blog;
 
 function initialize() {
   return new Promise(function (resolve, reject) {
-    let db = mongoose.createConnection(process.env.DATABASE_CONNECTION_STRING);
+    let db = mongoose.createConnection(evnConfig.MONGO_URI);
 
     db.on("error", (err) => {
       reject(err);

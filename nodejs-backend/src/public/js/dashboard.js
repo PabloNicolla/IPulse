@@ -2,7 +2,7 @@ const searchInput = document.getElementById("search-input");
 const searchButton = document.getElementById("search-button");
 
 function handleSubmit(searchTerm = searchInput.value) {
-  const route = "/dashboard"; // Replace with the correct route
+  const route = "/users/dashboard"; // Replace with the correct route
 
   // Construct the URL with the search term
   const searchURL = `${route}?q=${searchTerm}`;
