@@ -59,6 +59,7 @@
                 >
 <%= image.description %></textarea
                 >
+
                 <div class="divider"></div>
                 <!-- Tags Input -->
                 <input
@@ -136,55 +137,7 @@
 
     <script>
       localStorage.setItem("oImageId", "<%= image._id %>");
-
-      document.addEventListener("DOMContentLoaded", (event) => {
-        const form = document.getElementById("imageForm");
-        document
-          .getElementById("SaveAsNewButton")
-          .addEventListener("click", function () {
-            form.action = "/image/editor/upload";
-            localStorage.setItem("oImageId", "");
-            form.submit(); // Submit the form after changing the action
-          });
-
-        document
-          .getElementById("SaveChangesButton")
-          .addEventListener("click", function () {
-            form.action = "/image/editor/update";
-            localStorage.setItem("oImageId", "");
-            form.submit(); // Submit the form after changing the action
-          });
-      });
-
-      document
-        .getElementById("applyGrayscaleButton")
-        .addEventListener("click", function () {
-          fetch("/your-grayscale-route", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              // Any other headers your server requires
-            },
-            body: JSON.stringify({
-              image_id: document.LocalStorage.getItem("oImageId"),
-              // Include any other data your server might need
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.storagePath) {
-                // Assuming 'data' is the object returned by your server with the updated image info
-                document.getElementById("imageFormDisplay").src =
-                  data.storagePath;
-              } else {
-                // Handle any errors or unexpected responses
-                console.error("Failed to update the image");
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-        });
     </script>
+    <script type="module" src="/js/image-editor.js"></script>
   </body>
 </html>

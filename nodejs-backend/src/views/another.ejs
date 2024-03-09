@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/image/editor/grayscale", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image_id: "65e1295703a49a97b79352ca",
+          }),
+        })
+          .then((response) => response.blob()) // Get the response as a Blob
+          .then((blob) => {
+            // Create a URL for the Blob
+            const imageUrl = URL.createObjectURL(blob);
+
+            // Set the URL as the source for an <img> element
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            document.body.appendChild(img);
+
+            // Optionally, revoke the created URL after the image is loaded to release memory
+            img.onload = () => URL.revokeObjectURL(imageUrl);
+          })
+          .catch((error) =>
+            console.error("Error fetching processed image:", error),
+          );
+      });
+    </script>
+  </body>
+</html>

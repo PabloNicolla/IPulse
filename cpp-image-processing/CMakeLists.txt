@@ -4,8 +4,14 @@ project(cpp-image-processing)
 # Find OpenCV package
 find_package(OpenCV REQUIRED)
 
-# Include OpenCV header directories
+# Find OpenSSL package
+find_package(OpenSSL REQUIRED)
+
+# Include OpenCV header
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+# Include OpenSSL headers
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 set(INCLUDE_PATHS libraries/asio-1.28.0/include /libraries/Crow/include)
 
@@ -15,5 +21,8 @@ add_executable(cpp-image-processing ${SOURCES})
 
 target_include_directories(cpp-image-processing PUBLIC ${INCLUDE_PATHS})
 
-# Link your application with OpenCV libraries
+# Link OpenCV libraries
 target_link_libraries(cpp-image-processing ${OpenCV_LIBS})
+
+# Link OpenSSL libraries
+target_link_libraries(${PROJECT_NAME} OpenSSL::SSL OpenSSL::Crypto)

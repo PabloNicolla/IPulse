@@ -132,6 +132,7 @@ const allCards = [
 // Core
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 // Image Upload
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -148,6 +149,9 @@ const imageService = require("./image-service");
 const mongooseInit = require("./mongoose-init");
 // Safety
 require("dotenv").config();
+// Image Editor
+const axios = require("axios");
+const FormData = require("form-data");
 // Core
 const app = express();
 const HTTP_PORT = process.env.PORT || 8080;
@@ -362,9 +366,9 @@ app.get("/homepage", (req, res) => {
   });
 });
 
-app.get("/blog", ensureLogin, (req, res) => {
-  res.send("blog page");
-});
+// app.get("/blog", ensureLogin, (req, res) => { ---------------------------------------------------------------------
+//   res.send("blog page");
+// });
 
 app.get("/editor/post", ensureLogin, (req, res) => {
   res.send("editor post page");
@@ -435,6 +439,10 @@ app.get("/search/recommendations", (req, res) => {
   // This is just a placeholder response
   const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
   res.json(recommendations);
+});
+
+app.get("/blog", (req, res) => {
+  res.render("blog", { title: "Blog", user: req.session.user });
 });
 
 /* --- --- --- --- POST --- --- --- --- */
@@ -530,53 +538,284 @@ app.post("/image/editor", ensureLogin, (req, res) => {
   })();
 });
 
-app.post("/image/editor/upload", (req, res) => {
-  (async () => {
+app.post(
+  "/image/editor/upload",
+  upload.single("imageFile"),
+  async (req, res) => {
     try {
-      const originalImage = await imageService.getImageById(req.body.image_id);
-      req.body.tags = req.body.tags.split(",").map((tag) => tag.trim());
+      let uploadResult;
+
+      if (req.file) {
+        // New image uploaded: upload its buffer to Cloudinary
+        const fileBuffer = req.file.buffer; // Assuming multer is configured to use memory storage
+        uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({ resource_type: "auto" }, (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            })
+            .end(fileBuffer);
+        });
+      } else {
+        // No new image uploaded: duplicate the original image on Cloudinary
+        const originalImageURL = req.imageEditor.image.storagePath; // Ensure this is the full URL of the image
+        uploadResult = await cloudinary.uploader.upload(originalImageURL, {
+          resource_type: "image",
+          // Optionally, you can specify a new public_id here
+          // If you don't specify a public_id, Cloudinary will generate a new one
+        });
+      }
+
+      console.log("Image processed successfully", uploadResult);
+
       const newImage = {
         imageTitle: req.body.imageTitle,
         description: req.body.description,
-        tags: req.body.tags[0] === "" ? [] : req.body.tags,
+        tags: req.body.tags.split(",").map((tag) => tag.trim()) || [],
         creator: req.session.user.username,
-        storagePath: req.body.storagePath,
-        format: originalImage.format,
-        userId: originalImage.userId,
-        cloudinaryId: originalImage.cloudinaryId,
+        storagePath: uploadResult.url,
+        format: uploadResult.format,
+        userId: req.imageEditor.image.userId, // Assuming you want to keep the same userId
+        cloudinaryId: uploadResult.public_id, // The new Cloudinary ID
       };
-      await imageService.addImage(newImage);
+
+      await imageService.addImage(newImage); // Add the new image data to your database
       res.redirect("/dashboard");
     } catch (error) {
-      console.error("Error adding image", error);
+      console.error("Error processing image", error);
       res.status(500).send("An error occurred.");
     }
-  })();
-});
+  },
+);
 
-app.post("/image/editor/update", (req, res) => {
-  (async () => {
+// app.post("/image/editor/upload", (req, res) => {
+//   (async () => {
+//     try {
+//       const originalImage = await imageService.getImageById(req.body.image_id);
+//       req.body.tags = req.body.tags.split(",").map((tag) => tag.trim());
+//       const newImage = {
+//         imageTitle: req.body.imageTitle,
+//         description: req.body.description,
+//         tags: req.body.tags[0] === "" ? [] : req.body.tags,
+//         creator: req.session.user.username,
+//         storagePath: req.body.storagePath,
+//         format: originalImage.format,
+//         userId: originalImage.userId,
+//         cloudinaryId: originalImage.cloudinaryId,
+//       };
+//       await imageService.addImage(newImage);
+//       res.redirect("/dashboard");
+//     } catch (error) {
+//       console.error("Error adding image", error);
+//       res.status(500).send("An error occurred.");
+//     }
+//   })();
+// });
+
+app.post(
+  "/image/editor/update",
+  upload.single("imageFile"),
+  async (req, res) => {
     try {
-      const originalImage = await imageService.getImageById(req.body.image_id);
+      let uploadResult;
+
+      if (req.file) {
+        // Assuming multer is configured to use memory storage
+        const fileBuffer = req.file.buffer; // This line is crucial
+
+        // Use a Promise wrapper to handle the Cloudinary upload
+        uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                resource_type: "auto",
+                public_id: req.imageEditor.image.cloudinaryId,
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              },
+            )
+            .end(fileBuffer);
+        });
+
+        console.log("Image updated successfully", uploadResult);
+      }
+      let storagePath = uploadResult
+        ? uploadResult.url
+        : req.imageEditor.image.storagePath;
+
+      let format = uploadResult
+        ? req.file.mimetype.split("/").pop()
+        : req.imageEditor.image.format;
+
       const newImage = {
         _id: req.body.image_id,
         imageTitle: req.body.imageTitle,
         description: req.body.description,
         tags: req.body.tags.split(",").map((tag) => tag.trim()) || [],
         creator: req.session.user.username,
-        storagePath: req.body.storagePath,
-        format: originalImage.format,
-        userId: originalImage.userId,
-        cloudinaryId: originalImage.cloudinaryId,
+        storagePath: storagePath, // Consider updating this if needed
+        format: format, // Consider updating this if the format might change
+        userId: req.imageEditor.image.userId,
+        cloudinaryId: req.imageEditor.image.cloudinaryId,
       };
+
       await imageService.updateImage(newImage);
       res.redirect("/dashboard");
     } catch (error) {
       console.error("Error updating image", error);
       res.status(500).send("An error occurred.");
     }
-  })();
+  },
+);
+
+// app.post("/image/editor/grayscale", async (req, res) => {
+//   try {
+//     const image = await imageService.getImageById(req.body.image_id);
+
+//     const response = await axios.get(image.storagePath, {
+//       responseType: "arraybuffer",
+//     });
+
+//     const formData = new FormData();
+//     formData.append("image", response.data, {
+//       filename: "image.jpg",
+//       contentType: "image/jpeg",
+//     });
+
+//     const processedImageResponse = await axios.post(
+//       "http://localhost:8081/upload",
+//       formData,
+//       {
+//         headers: {
+//           ...formData.getHeaders(),
+//         },
+//         responseType: "arraybuffer", // Ensure you get the response as a Buffer
+//       },
+//     );
+
+//     if (processedImageResponse.data) {
+//       // Convert the binary data to a Buffer
+//       const imageBuffer = Buffer.from(processedImageResponse.data);
+
+//       // Define the path where the image will be saved
+//       const imagePath = path.join(__dirname, "public", "processedImage.jpg");
+
+//       // Write the Buffer to a file
+//       fs.writeFile(imagePath, imageBuffer, (err) => {
+//         if (err) {
+//           console.error("Error saving image:", err);
+//           return res
+//             .status(500)
+//             .send("An error occurred while saving the image.");
+//         }
+
+//         console.log("Image saved successfully.");
+//         res.json({
+//           success: true,
+//           message: "Image processed and saved successfully.",
+//         });
+//       });
+//     } else {
+//       res.status(500).json({
+//         success: false,
+//         message: "No data received from processing service.",
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error applying grayscale filter", error);
+//     res.status(500).send("An error occurred.");
+//   }
+// });
+
+app.post("/image/editor/grayscale", async (req, res) => {
+  try {
+    const response = await axios.get(req.imageEditor.image.storagePath, {
+      responseType: "arraybuffer",
+    });
+
+    const formData = new FormData();
+    formData.append("image", response.data, {
+      filename: "image.jpg",
+      contentType: "image/jpeg",
+    });
+
+    const processedImageResponse = await axios.post(
+      "http://localhost:8081/upload",
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+        },
+        responseType: "arraybuffer", // Ensure you get the response as a Buffer
+      },
+    );
+
+    if (processedImageResponse.data) {
+      // Set the correct content type for the image
+      res.set("Content-Type", "image/jpeg");
+      // Send the image buffer directly in the response body
+      res.send(processedImageResponse.data);
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "No data received from processing service.",
+      });
+    }
+  } catch (error) {
+    console.error("Error applying grayscale filter", error);
+    res.status(500).send("An error occurred.");
+  }
 });
+
+app.get("/testing", (req, res) => {
+  res.render("another", { title: "Testing", user: req.session.user });
+});
+
+// app.post("/image/editor/grayscale", async (req, res) => {
+//   try {
+//     // Assuming imageService.getImageById() correctly retrieves image details
+//     const image = await imageService.getImageById(req.body.image_id);
+
+//     // Download the image as a Buffer
+//     const response = await axios.get(image.storagePath, {
+//       responseType: "arraybuffer",
+//     });
+
+//     // Prepare the FormData with the binary image data
+//     const formData = new FormData();
+//     formData.append("image", response.data, {
+//       filename: "image.jpg", // Provide a filename
+//       contentType: "image/jpeg", // Set the content type
+//     });
+
+//     // Perform the POST request
+//     const processedImageResponse = await axios.post(
+//       "http://localhost:8081/upload",
+//       formData,
+//       {
+//         headers: {
+//           ...formData.getHeaders(), // Important: Get headers for multipart/form-data
+//         },
+//       },
+//     );
+
+//     // Extract and respond with the processed image data or any other specific response data you expect
+//     if (processedImageResponse.data) {
+//       res.set("Content-Type", "image/jpeg");
+//       res.json({ imageData: processedImageResponse.data });
+//     } else {
+//       res.status(500).json({
+//         success: false,
+//         message: "No data received from processing service.",
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error applying grayscale filter", error);
+//     res.status(500).send("An error occurred.");
+//   }
+// });
 
 app.post(
   "/profile/update",

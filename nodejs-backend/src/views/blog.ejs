@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Image Upload and Display</h1>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button onclick="uploadImage()">Upload Image</button>
+    <br />
+    <!-- Image tag for displaying the processed image -->
+    <img
+      id="displayedImage"
+      src=""
+      alt="Processed Image"
+      style="margin-top: 20px"
+    />
+
+    <form id="saveImageForm" action="URL_TO_YOUR_OTHER_BACKEND" method="post">
+      <input type="hidden" name="imageName" value="processedImage.jpg" />
+      <button type="submit">Save Image</button>
+    </form>
+
+    <script>
+      function uploadImage() {
+        const input = document.getElementById("imageInput");
+        const filterType = "grayscale"; // Example additional parameter
+        if (!input.files.length) {
+          alert("Please select an image to upload.");
+          return;
+        }
+
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("filterType", filterType); // Append additional parameter
+
+        fetch("http://localhost:8081/upload", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            console.log(response.body);
+            return response.blob(); // Convert the response to a blob
+          })
+          .then((blob) => {
+            // Create an object URL for the blob and set it as the src of the img tag
+            const imageUrl = URL.createObjectURL(blob);
+            document.getElementById("displayedImage").src = imageUrl;
+          })
+          .catch((error) => {
+            console.error(
+              "There has been a problem with your fetch operation:",
+              error,
+            );
+          });
+      }
+    </script>
+  </body>
+</html>

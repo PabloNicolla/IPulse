@@ -14,6 +14,7 @@ RUN apt-get install git -y
 RUN apt-get install wget -y
 RUN apt-get install build-essential -y
 RUN apt-get install libopencv-dev -y
+RUN apt-get install libssl-dev -y
 
 # Copy your source code
 COPY src/ ./src
