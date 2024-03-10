@@ -197,18 +197,35 @@ exports.getSupportPage = (req, res) => {
 
 exports.getSearchPage = async (req, res) => {
   try {
-    const images = await imageService.getAllImages();
-
     const itemsPerPage = 2;
     let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
     const offset = (page - 1) * itemsPerPage;
 
-    const paginatedItems = images.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(images.length / itemsPerPage);
+    let searchCondition = {};
+    if (req.query.q) {
+      const search = req.query.q;
+      // Using $regex to search for non-exact matches. 'i' option for case-insensitive search.
+      searchCondition = {
+        $or: [
+          { imageTitle: { $regex: search, $options: "i" } },
+          { creator: { $regex: search, $options: "i" } },
+          { tags: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
+    const images = await imageService.getImagesCustom(
+      searchCondition,
+      offset,
+      itemsPerPage,
+    );
+    const totalMatches = await imageService.getImagesCount(searchCondition);
+
+    const totalPages = Math.ceil(totalMatches / itemsPerPage);
 
     const now = new Date(); // Get the current time
     const thirtyMinutes = 5 * 60 * 60 * 1000; // 5hrs in milliseconds
-    for (img of paginatedItems) {
+    for (img of images) {
       var updatedAt = new Date(img.updatedAt); // Ensure updatedAt is a Date object
       img.isRecent = now - updatedAt < thirtyMinutes; // Compare the time difference
     }
@@ -216,7 +233,7 @@ exports.getSearchPage = async (req, res) => {
     res.render("search", {
       title: "Search",
       user: req.session.user,
-      cards: paginatedItems,
+      cards: images,
       currentPage: page,
       totalPages: totalPages,
       cQuery: req.query.q,
@@ -227,13 +244,58 @@ exports.getSearchPage = async (req, res) => {
   }
 };
 
-exports.getSearchRecommendations = (req, res) => {
+exports.getSearchRecommendations = async (req, res) => {
   const query = req.query.q;
-  // Implement logic to find recommendations based on the query
-  // This is just a placeholder response
-  const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
-  res.json(recommendations);
+
+  if (!query || query.length < 3) {
+    return res.json([]); // Return empty array if query is too short or missing
+  }
+
+  // Define your search condition using $regex for partial matching and $or to search across fields
+  const searchCondition = {
+    $or: [
+      { imageTitle: { $regex: query, $options: "i" } }, // Case-insensitive
+      { creator: { $regex: query, $options: "i" } },
+      { tags: { $regex: query, $options: "i" } },
+    ],
+  };
+
+  try {
+    // Find up to 10 documents matching the search condition
+    const recommendations = await imageService.getImagesCustom(
+      searchCondition,
+      0,
+      10,
+      true, // Set lean to true for better performance
+    );
+
+    // Transform the recommendations to the desired format if needed
+    // For example, you might want to concatenate fields or just return titles
+    let formattedRecommendations = [];
+    for (let i = 0; i < recommendations.length; i++) {
+      if (i % 3 === 0) {
+        formattedRecommendations.push(recommendations[i].imageTitle);
+      } else if (i % 3 === 1) {
+        formattedRecommendations.push(recommendations[i].creator);
+      } else {
+        formattedRecommendations.push(recommendations[i].tags);
+      }
+    }
+
+    res.json(formattedRecommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ message: "Error fetching recommendations" });
+  }
 };
+
+// exports.getSearchRecommendations = (req, res) => {
+//   const query = req.query.q;
+//   // Implement logic to find recommendations based on the query
+//   // This is just a placeholder response
+//   const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
+//   res.json(recommendations);
+// };
 
 exports.setTheme = (req, res) => {
   const { theme } = req.body;

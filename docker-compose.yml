@@ -27,7 +27,7 @@ services:
     # volumes:
     #   - ./cpp-image-processing:/usr/src/app
     ports:
-      - "8101:8080" # Map port 8101 on your host to port 8080 in the container
+      - "18080:18080" # Map port 8101 on your host to port 8080 in the container
     networks:
       - app-network
 

@@ -1,4 +1,5 @@
 const mongooseInit = require("./mongoose-init");
+const { search } = require("./routes/public");
 
 let Image;
 let User;
@@ -67,6 +68,43 @@ module.exports.getImagesByMinDate = (date) => {
     Image.find({ createdAt: { $gte: date } })
       .exec()
       .then((images) => resolve(images))
+      .catch((err) => reject(`Unable to query images: ${err}`));
+  });
+};
+
+module.exports.getImagesCustom = (
+  searchCondition,
+  skip = 0,
+  limit = 0,
+  lean = false,
+) => {
+  return new Promise((resolve, reject) => {
+    let query = Image.find(searchCondition);
+
+    if (!isNaN(skip) && skip > 0) {
+      query = query.skip(skip);
+    }
+
+    if (!isNaN(limit) && limit > 0) {
+      query = query.limit(limit);
+    }
+
+    if (lean) {
+      query = query.lean();
+    }
+
+    query
+      .exec()
+      .then((images) => resolve(images))
+      .catch((err) => reject(`Unable to query images: ${err}`));
+  });
+};
+
+module.exports.getImagesCount = (searchCondition) => {
+  return new Promise((resolve, reject) => {
+    Image.countDocuments(searchCondition)
+      .exec()
+      .then((count) => resolve(count))
       .catch((err) => reject(`Unable to query images: ${err}`));
   });
 };

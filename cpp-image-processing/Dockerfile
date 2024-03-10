@@ -45,7 +45,7 @@ RUN cmake .. \
     && make
 
 # Expose the port
-EXPOSE 8080
+EXPOSE 18080
 
 # Adjust this path if your executable is in a different directory
 CMD ["./cpp-image-processing"]

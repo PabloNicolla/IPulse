@@ -172,10 +172,24 @@ async function applyImageFilter(req, res, filterUrl) {
 
 // Expose endpoint to apply grayscale filter
 exports.applyGrayscale = async (req, res) => {
-  await applyImageFilter(req, res, "http://localhost:8081/grayscale");
+  await applyImageFilter(
+    req,
+    res,
+    "http://cpp-image-processing:18080/grayscale",
+  );
 };
 
 // Expose endpoint to apply invert filter
 exports.applyInvert = async (req, res) => {
-  await applyImageFilter(req, res, "http://localhost:8081/invert");
+  await applyImageFilter(req, res, "http://cpp-image-processing:18080/invert");
 };
+
+// // Expose endpoint to apply grayscale filter
+// exports.applyGrayscale = async (req, res) => {
+//   await applyImageFilter(req, res, "http://localhost:8081/grayscale");
+// };
+
+// // Expose endpoint to apply invert filter
+// exports.applyInvert = async (req, res) => {
+//   await applyImageFilter(req, res, "http://localhost:8081/invert");
+// };
