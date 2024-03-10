@@ -60,16 +60,17 @@
           <div class="overflow-x-auto">
             <table class="table w-full">
               <% if(cards.length > 0) { %>
-              <!-- head -->
+              <!-- Table head -->
               <thead>
                 <tr>
                   <th></th>
                   <th>Title</th>
-                  <th>Description</th>
-                  <th>Badges</th>
+                  <th class="hidden md:table-cell">Description</th>
+                  <th class="hidden md:table-cell">Badges</th>
                   <th></th>
                 </tr>
               </thead>
+              <!-- Table body -->
               <tbody>
                 <!-- Dynamically generate rows from cards data -->
                 <% cards.forEach(function(card, index) { %>
@@ -93,13 +94,15 @@
                       </div>
                       <div>
                         <div class="font-bold"><%= card.imageTitle %></div>
+                        <% if (card.isRecent) { %>
                         <div class="badge badge-secondary">NEW</div>
+                        <% } %>
                       </div>
                     </div>
                   </td>
-                  <td><%= card.description %></td>
-                  <td>
-                    <% card.tags.forEach(function(badge) { %>
+                  <td class="hidden md:table-cell"><%= card.description %></td>
+                  <td class="hidden md:table-cell">
+                    <% card.tags.slice(0, 2).forEach(function(badge) { %>
                     <div class="badge badge-outline"><%= badge %></div>
                     <% }); %>
                   </td>
@@ -109,13 +112,13 @@
                 </tr>
                 <% }); %>
               </tbody>
-              <!-- foot -->
+              <!-- Table foot -->
               <tfoot>
                 <tr>
                   <th></th>
                   <th>Title</th>
-                  <th>Description</th>
-                  <th>Badges</th>
+                  <th class="hidden md:table-cell">Description</th>
+                  <th class="hidden md:table-cell">Badges</th>
                   <th></th>
                 </tr>
               </tfoot>
@@ -306,7 +309,7 @@
     </div>
 
     <script type="module" src="/js/dashboard.js"></script>
-    <script type="module" src="/js/search-recommendations.js"></script>
+    <script type="module" src="/js/dashboard-recommendations.js"></script>
     <script type="module" src="/js/delete-images.js"></script>
     <script type="module" src="/js/dashboard-forms.js"></script>
   </body>

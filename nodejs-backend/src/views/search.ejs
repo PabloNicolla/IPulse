@@ -51,30 +51,36 @@
 
     <!-- Cards -->
     <div class="flex flex-wrap justify-center p-8">
-      <% cards.forEach(function(card, index) { %> <% if (index < 3) { %>
+      <% cards.forEach(function(card, index) { %>
       <!-- Check to ensure only 12 cards are rendered -->
       <div class="flex p-4">
         <div
           class="card w-96 rounded-lg border border-base-content bg-base-300 shadow-xl"
+          onclick="showImageModal('<%= card.storagePath %>')"
         >
-          <figure>
-            <img src="<%= card.imgSrc %>" alt="Card Image" />
+          <figure class="flex h-64">
+            <img
+              src="<%= card.storagePath %>"
+              class="h-full w-auto"
+              alt="Card Image"
+            />
           </figure>
           <div class="card-body">
             <h2 class="card-title">
-              <%= card.title %>
+              <%= card.imageTitle %> <% if (card.isRecent) { %>
               <div class="badge badge-secondary">NEW</div>
+              <% } %>
             </h2>
             <p><%= card.description %></p>
             <div class="card-actions justify-end">
-              <% card.badges.forEach(function(badge) { %>
+              <% card.tags.forEach(function(badge) { %>
               <div class="badge badge-outline"><%= badge %></div>
               <% }); %>
             </div>
           </div>
         </div>
       </div>
-      <% } %> <% }); %>
+      <% }); %>
     </div>
 
     <!-- Pagination Buttons -->
@@ -116,9 +122,26 @@
       </div>
     </div>
 
+    <!-- Modal -->
+    <dialog id="my_modal" class="modal">
+      <div class="modal-box">
+        <img id="modalImage" src="" alt="image" class="h-full w-full" />
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
+
     <%- include('partials/footer') %>
 
     <script type="module" src="/js/search-form.js"></script>
     <script type="module" src="/js/search-recommendations.js"></script>
+    <script>
+      // Function to display the modal and set the image
+      function showImageModal(imageSrc) {
+        document.getElementById("modalImage").src = imageSrc;
+        document.getElementById("my_modal").showModal();
+      }
+    </script>
   </body>
 </html>

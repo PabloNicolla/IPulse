@@ -82,12 +82,19 @@ exports.getDashboardPage = async (req, res) => {
   try {
     const images = await imageService.getImagesByUser(req.session.user.userId);
 
-    const itemsPerPage = 15;
+    const itemsPerPage = 2;
     let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
     const offset = (page - 1) * itemsPerPage;
 
     const paginatedItems = images.slice(offset, offset + itemsPerPage);
     const totalPages = Math.ceil(images.length / itemsPerPage);
+
+    const now = new Date(); // Get the current time
+    const thirtyMinutes = 5 * 60 * 60 * 1000; // 5hrs in milliseconds
+    for (img of paginatedItems) {
+      var updatedAt = new Date(img.updatedAt); // Ensure updatedAt is a Date object
+      img.isRecent = now - updatedAt < thirtyMinutes; // Compare the time difference
+    }
 
     res.render("dashboard", {
       title: "Dashboard",
@@ -101,6 +108,14 @@ exports.getDashboardPage = async (req, res) => {
     console.error("Error fetching dashboard data", error);
     res.status(500).send("An error occurred.");
   }
+};
+
+exports.getDashboardRecommendations = (req, res) => {
+  const query = req.query.q;
+  // Implement logic to find recommendations based on the query
+  // This is just a placeholder response
+  const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
+  res.json(recommendations);
 };
 
 exports.getProfilePage = (req, res) => {

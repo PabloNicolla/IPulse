@@ -26,6 +26,15 @@ module.exports.addImage = (imageData) => {
 
 /* Read */
 
+module.exports.getAllImages = () => {
+  return new Promise((resolve, reject) => {
+    Image.find()
+      .exec()
+      .then((images) => resolve(images))
+      .catch((err) => reject(`Unable to query images: ${err}`));
+  });
+};
+
 module.exports.getImageById = (id) => {
   return new Promise((resolve, reject) => {
     Image.find({ _id: id })

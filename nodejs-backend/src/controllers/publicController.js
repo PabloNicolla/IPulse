@@ -195,25 +195,36 @@ exports.getSupportPage = (req, res) => {
   res.render("support", { title: "Support", user: req.session.user });
 };
 
-exports.getSearchPage = (req, res) => {
-  const itemsPerPage = 3;
-  let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
-  const offset = (page - 1) * itemsPerPage;
+exports.getSearchPage = async (req, res) => {
+  try {
+    const images = await imageService.getAllImages();
 
-  // Assuming `allCards` is an array containing all your card data
-  const paginatedItems = allCards.slice(offset, offset + itemsPerPage);
+    const itemsPerPage = 2;
+    let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+    const offset = (page - 1) * itemsPerPage;
 
-  // Calculate the total number of pages
-  const totalPages = Math.ceil(allCards.length / itemsPerPage);
+    const paginatedItems = images.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(images.length / itemsPerPage);
 
-  res.render("search", {
-    title: "Search",
-    user: req.session.user,
-    cards: paginatedItems,
-    currentPage: page,
-    totalPages: totalPages,
-    cQuery: req.query.q,
-  });
+    const now = new Date(); // Get the current time
+    const thirtyMinutes = 5 * 60 * 60 * 1000; // 5hrs in milliseconds
+    for (img of paginatedItems) {
+      var updatedAt = new Date(img.updatedAt); // Ensure updatedAt is a Date object
+      img.isRecent = now - updatedAt < thirtyMinutes; // Compare the time difference
+    }
+
+    res.render("search", {
+      title: "Search",
+      user: req.session.user,
+      cards: paginatedItems,
+      currentPage: page,
+      totalPages: totalPages,
+      cQuery: req.query.q,
+    });
+  } catch (error) {
+    console.error("Error fetching images:", error);
+    res.status(500).send("An error occurred.");
+  }
 };
 
 exports.getSearchRecommendations = (req, res) => {

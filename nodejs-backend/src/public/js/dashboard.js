@@ -6,6 +6,7 @@ function handleSubmit(searchTerm = searchInput.value) {
 
   // Construct the URL with the search term
   const searchURL = `${route}?q=${searchTerm}`;
+  console.log(searchURL);
 
   // Redirect the user
   window.location.href = searchURL;

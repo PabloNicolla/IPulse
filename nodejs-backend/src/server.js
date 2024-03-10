@@ -25,8 +25,8 @@ app.set("view engine", "ejs");
 
 /* --- --- --- --- GET VIEWS --- --- --- --- */
 
-const userRoutes = require("./routes/users");
 const publicRoutes = require("./routes/public");
+const userRoutes = require("./routes/users");
 const imageRoutes = require("./routes/images");
 
 app.use("/", publicRoutes);

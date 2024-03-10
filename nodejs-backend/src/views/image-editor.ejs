@@ -33,12 +33,20 @@
                   <% }); %>
                 </div>
               </div>
-              <figure>
-                <img src="<%= image.storagePath %>" alt="Image" />
+              <figure class="flex min-w-[300px]">
+                <img
+                  src="<%= image.storagePath %>"
+                  alt="Image"
+                  class="h-auto w-full"
+                />
               </figure>
             </div>
           </div>
-          <div class="divider lg:divider-horizontal">TO</div>
+          <div
+            class="divider divider-primary text-primary lg:divider-horizontal"
+          >
+            TO
+          </div>
           <!-- After -->
           <div class="flex h-full items-center justify-center">
             <div class="card w-full bg-base-300 shadow-xl">
@@ -77,11 +85,12 @@
                   value="<%= image.storagePath %>"
                 />
               </form>
-              <figure>
+              <figure class="flex min-w-[300px]">
                 <img
                   src="<%= image.storagePath %>"
                   alt="Image"
                   id="imageFormDisplay"
+                  class="h-auto w-full"
                 />
               </figure>
             </div>
