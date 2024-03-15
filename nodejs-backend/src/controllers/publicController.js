@@ -1,134 +1,3 @@
-const allCards = [
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  {
-    imgSrc:
-      "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-    title: "Title 1",
-    description: "Description 1",
-    badges: ["Fashion", "Products"],
-  },
-  // Add up to 12 card objects
-];
-// test
-
 const authService = require("../auth-service"); // Example service module for auth
 const imageService = require("../image-service"); // Example service module for images
 
@@ -251,51 +120,47 @@ exports.getSearchRecommendations = async (req, res) => {
     return res.json([]); // Return empty array if query is too short or missing
   }
 
+  const regexPattern = new RegExp(query, "i"); // Case-insensitive regex pattern based on the query
+
   // Define your search condition using $regex for partial matching and $or to search across fields
   const searchCondition = {
     $or: [
-      { imageTitle: { $regex: query, $options: "i" } }, // Case-insensitive
+      { imageTitle: { $regex: query, $options: "i" } },
       { creator: { $regex: query, $options: "i" } },
       { tags: { $regex: query, $options: "i" } },
     ],
   };
 
   try {
-    // Find up to 10 documents matching the search condition
     const recommendations = await imageService.getImagesCustom(
       searchCondition,
       0,
       10,
-      true, // Set lean to true for better performance
+      true,
     );
 
-    // Transform the recommendations to the desired format if needed
-    // For example, you might want to concatenate fields or just return titles
-    let formattedRecommendations = [];
-    for (let i = 0; i < recommendations.length; i++) {
-      if (i % 3 === 0) {
-        formattedRecommendations.push(recommendations[i].imageTitle);
-      } else if (i % 3 === 1) {
-        formattedRecommendations.push(recommendations[i].creator);
-      } else {
-        formattedRecommendations.push(recommendations[i].tags);
+    let formattedRecommendations = new Set(); // Use a set to avoid duplicate recommendations
+    recommendations.forEach((rec) => {
+      // Apply the regex to filter matching fields within each document
+      if (regexPattern.test(rec.imageTitle)) {
+        formattedRecommendations.add(rec.imageTitle);
       }
-    }
+      if (regexPattern.test(rec.creator)) {
+        formattedRecommendations.add(rec.creator);
+      }
+      rec.tags.forEach((tag) => {
+        if (regexPattern.test(tag)) {
+          formattedRecommendations.add(tag);
+        }
+      });
+    });
 
-    res.json(formattedRecommendations);
+    res.json(Array.from(formattedRecommendations));
   } catch (error) {
     console.error("Error fetching recommendations:", error);
     res.status(500).json({ message: "Error fetching recommendations" });
   }
 };
-
-// exports.getSearchRecommendations = (req, res) => {
-//   const query = req.query.q;
-//   // Implement logic to find recommendations based on the query
-//   // This is just a placeholder response
-//   const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
-//   res.json(recommendations);
-// };
 
 exports.setTheme = (req, res) => {
   const { theme } = req.body;

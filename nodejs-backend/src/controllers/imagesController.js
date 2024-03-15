@@ -170,7 +170,6 @@ async function applyImageFilter(req, res, filterUrl) {
   }
 }
 
-// Expose endpoint to apply grayscale filter
 exports.applyGrayscale = async (req, res) => {
   await applyImageFilter(
     req,
@@ -179,17 +178,30 @@ exports.applyGrayscale = async (req, res) => {
   );
 };
 
-// Expose endpoint to apply invert filter
 exports.applyInvert = async (req, res) => {
   await applyImageFilter(req, res, "http://cpp-image-processing:18080/invert");
 };
 
-// // Expose endpoint to apply grayscale filter
-// exports.applyGrayscale = async (req, res) => {
-//   await applyImageFilter(req, res, "http://localhost:8081/grayscale");
-// };
+exports.applyGaussianBlur = async (req, res) => {
+  await applyImageFilter(
+    req,
+    res,
+    "http://cpp-image-processing:18080/gaussianBlur",
+  );
+};
 
-// // Expose endpoint to apply invert filter
-// exports.applyInvert = async (req, res) => {
-//   await applyImageFilter(req, res, "http://localhost:8081/invert");
-// };
+exports.applyCannyEdgeDetection = async (req, res) => {
+  await applyImageFilter(
+    req,
+    res,
+    "http://cpp-image-processing:18080/cannyEdgeDetection",
+  );
+};
+
+exports.applyEqualizeHist = async (req, res) => {
+  await applyImageFilter(
+    req,
+    res,
+    "http://cpp-image-processing:18080/equalizeHist",
+  );
+};

@@ -1,14 +1,17 @@
 const bcrypt = require("bcryptjs");
 const mongooseInit = require("./mongoose-init");
+const { getRedisClient } = require("./redis-service");
 
+let redisClient;
 let User;
 
-module.exports.initialize = () => {
-  User = mongooseInit.getModel("User");
-
-  return new Promise((resolve, reject) => {
-    resolve();
-  });
+module.exports.initialize = async () => {
+  try {
+    User = mongooseInit.getModel("User");
+    redisClient = await getRedisClient();
+  } catch (error) {
+    throw new Error("Error initializing auth service", error);
+  }
 };
 
 /* Create */
@@ -86,29 +89,43 @@ module.exports.checkUser = (userData) => {
   });
 };
 
-module.exports.getUserByUsername = (username) => {
-  return new Promise((resolve, reject) => {
-    User.findOne({ username: username })
-      .exec()
-      .then((user) => resolve(user))
-      .catch((err) => reject(`Unable to find user with username: ${username}`));
-  });
+module.exports.getUserByUsername = async (username) => {
+  try {
+    const cachedUser = await redisClient.get(`user:${username}`);
+    if (cachedUser) {
+      return JSON.parse(cachedUser); // Return the cached user
+    }
+
+    const user = await User.findOne({
+      username: username,
+    })
+      .lean()
+      .exec();
+    if (!user) {
+      throw new Error(`Unable to find user with username: ${username}`);
+    }
+
+    await redisClient.set(`user:${username}`, JSON.stringify(user), {
+      EX: 3600,
+    }); // Cache for 1 hour
+    return user;
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 /* Update */
 
-module.exports.updateUserProfile = (username, profileData) => {
-  return new Promise((resolve, reject) => {
+module.exports.updateUserProfile = async (username, profileData) => {
+  try {
     let updateObject = {};
     for (const [key, value] of Object.entries(profileData)) {
       updateObject[`profile.${key}`] = value;
     }
-
-    User.updateOne({ username }, { $set: updateObject })
-      .exec()
-      .then(() => resolve("User profile updated successfully."))
-      .catch((err) =>
-        reject(`There was an error updating the user profile: ${err}`),
-      );
-  });
+    await User.updateOne({ username }, { $set: updateObject }).exec();
+    await redisClient.del(`user:${username}`); // Invalidate the cache
+    return "User profile updated successfully.";
+  } catch (err) {
+    throw new Error(`There was an error updating the user profile: ${err}`);
+  }
 };

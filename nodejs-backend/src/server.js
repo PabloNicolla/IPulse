@@ -8,6 +8,7 @@ const mongooseInit = require("./mongoose-init");
 const authService = require("./auth-service");
 const imageService = require("./image-service");
 const blogService = require("./blog-service");
+const redisService = require("./redis-service");
 // Safety
 const { HTTPS_PORT, HTTP_PORT } = require("./config/index");
 require("dotenv").config();
@@ -59,6 +60,24 @@ app.post("/blog/publish", (req, res) => {
   res.send("Blog post published");
 });
 
+//test image by min date
+app.get("/test", async (req, res) => {
+  let dates = ["2020-05-01", "2020-05-02", "2020-05-03", "2020-05-04"];
+  for (date of dates) {
+    console.log(date);
+    minDate = new Date(date);
+    console.log(minDate);
+    const images = await imageService.getImagesByMinDate(minDate);
+  }
+  // await imageService.cleanupExpiredEntries();
+  res.json("test");
+});
+
+app.get("/test1", async (req, res) => {
+  await imageService.cleanupExpiredEntries();
+  res.json("test1");
+});
+
 /* --- --- --- --- 404 --- --- --- --- */
 
 app.use((req, res, next) => {
@@ -70,8 +89,10 @@ app.use((req, res, next) => {
 (async () => {
   try {
     await mongooseInit.initialize();
+    await redisService.initialize();
     await authService.initialize();
     await imageService.initialize();
+
     app.listen(HTTP_PORT, () => {
       console.log(`Example app listening at http://localhost:${HTTP_PORT}`);
     });

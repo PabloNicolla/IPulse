@@ -10,7 +10,10 @@ public:
     enum class Operation
     {
         Grayscale,
-        Invert
+        Invert,
+        GaussianBlur,
+        CannyEdgeDetection,
+        EqualizeHist
     };
 
     static std::vector<uchar> processImage(const std::vector<uchar> &data, Operation operation)
@@ -30,6 +33,15 @@ public:
         case Operation::Invert:
             cv::bitwise_not(img, processedImg);
             break;
+        case Operation::GaussianBlur:
+            cv::GaussianBlur(img, processedImg, cv::Size(5, 5), 0);
+            break;
+        case Operation::CannyEdgeDetection:
+            cv::Canny(img, processedImg, 100, 200);
+            break;
+        case Operation::EqualizeHist:
+            applyEqualizeHist(img, processedImg);
+            break;
         default:
             throw std::invalid_argument("Unsupported operation");
         }
@@ -37,5 +49,26 @@ public:
         std::vector<uchar> encodedImg;
         cv::imencode(".jpg", processedImg, encodedImg);
         return encodedImg;
+    }
+
+private:
+    static void applyEqualizeHist(const cv::Mat &img, cv::Mat &processedImg)
+    {
+        // Convert the original image from BGR to YCrCb color space
+        cv::Mat imageYCrCb;
+        cv::cvtColor(img, imageYCrCb, cv::COLOR_BGR2YCrCb);
+
+        // Split the YCrCb image into separate channels
+        std::vector<cv::Mat> channels;
+        cv::split(imageYCrCb, channels);
+
+        // Equalize the histogram of the Y channel (intensity)
+        cv::equalizeHist(channels[0], channels[0]);
+
+        // Merge the modified Y channel back with the Cr and Cb channels
+        cv::merge(channels, imageYCrCb);
+
+        // Convert the YCrCb image back to the BGR color space
+        cv::cvtColor(imageYCrCb, processedImg, cv::COLOR_YCrCb2BGR);
     }
 };

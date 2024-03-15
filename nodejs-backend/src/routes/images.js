@@ -34,5 +34,20 @@ router.post(
 router.post("/delete/images", ensureLogin, imageController.deleteImages);
 router.post("/editor/grayscale", ensureLogin, imageController.applyGrayscale);
 router.post("/editor/invert", ensureLogin, imageController.applyInvert);
+router.post(
+  "/editor/gaussianBlur",
+  ensureLogin,
+  imageController.applyGaussianBlur,
+);
+router.post(
+  "/editor/cannyEdgeDetection",
+  ensureLogin,
+  imageController.applyCannyEdgeDetection,
+);
+router.post(
+  "/editor/equalizeHist",
+  ensureLogin,
+  imageController.applyEqualizeHist,
+);
 
 module.exports = router;

@@ -46,9 +46,26 @@ const uploadToCloudinary2 = (filePath, options = {}) => {
   });
 };
 
+/**
+ * Deletes an image from Cloudinary using its public ID.
+ *
+ * @param {string} publicId The public ID of the image to delete.
+ * @param {Object} options Optional. Additional options for the delete operation.
+ * @returns {Promise} A promise that resolves with the result of the delete operation.
+ */
+const deleteImageFromCloudinary = (publicId, options = {}) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(publicId, options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+  });
+};
+
 module.exports = {
   upload,
   cloudinaryUploadMiddleware,
   uploadStreamToCloudinary,
   uploadToCloudinary2,
+  deleteImageFromCloudinary,
 };

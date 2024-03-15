@@ -23,6 +23,27 @@ struct CorsMiddleware
   }
 };
 
+crow::response processImageRequest(const crow::request &req, ImageProcessor::Operation op)
+{
+  try
+  {
+    crow::multipart::message msg(req);
+    auto imagePart = msg.get_part_by_name("image");
+    std::vector<uchar> data(imagePart.body.begin(), imagePart.body.end());
+
+    auto processedData = ImageProcessor::processImage(data, op);
+
+    crow::response res;
+    res.set_header("Content-Type", "image/jpeg");
+    res.body = std::string(processedData.begin(), processedData.end());
+    return res;
+  }
+  catch (const std::exception &e)
+  {
+    return crow::response(400, e.what());
+  }
+}
+
 int main()
 {
   crow::App<CorsMiddleware> app;
@@ -32,38 +53,19 @@ int main()
    { return "Hello, world!"; });
 
   CROW_ROUTE(app, "/grayscale").methods("POST"_method)([](const crow::request &req)
-                                                       {
-    try {
-        crow::multipart::message msg(req);
-        auto imagePart = msg.get_part_by_name("image");
-        std::vector<uchar> data(imagePart.body.begin(), imagePart.body.end());
-
-        auto processedData = ImageProcessor::processImage(data, ImageProcessor::Operation::Grayscale);
-
-        crow::response res;
-        res.set_header("Content-Type", "image/jpeg");
-        res.body = std::string(processedData.begin(), processedData.end());
-        return res;
-    } catch (const std::exception& e) {
-        return crow::response(400, e.what());
-    } });
+                                                       { return processImageRequest(req, ImageProcessor::Operation::Grayscale); });
 
   CROW_ROUTE(app, "/invert").methods("POST"_method)([](const crow::request &req)
-                                                    {
-    try {
-        crow::multipart::message msg(req);
-        auto imagePart = msg.get_part_by_name("image");
-        std::vector<uchar> data(imagePart.body.begin(), imagePart.body.end());
+                                                    { return processImageRequest(req, ImageProcessor::Operation::Invert); });
 
-        auto processedData = ImageProcessor::processImage(data, ImageProcessor::Operation::Invert);
+  CROW_ROUTE(app, "/gaussianBlur").methods("POST"_method)([](const crow::request &req)
+                                                          { return processImageRequest(req, ImageProcessor::Operation::GaussianBlur); });
 
-        crow::response res;
-        res.set_header("Content-Type", "image/jpeg");
-        res.body = std::string(processedData.begin(), processedData.end());
-        return res;
-    } catch (const std::exception& e) {
-        return crow::response(400, e.what());
-    } });
+  CROW_ROUTE(app, "/cannyEdgeDetection").methods("POST"_method)([](const crow::request &req)
+                                                                { return processImageRequest(req, ImageProcessor::Operation::CannyEdgeDetection); });
+
+  CROW_ROUTE(app, "/equalizeHist").methods("POST"_method)([](const crow::request &req)
+                                                          { return processImageRequest(req, ImageProcessor::Operation::EqualizeHist); });
 
   // app.bindaddr("127.0.0.1").port(18080).multithreaded().run();
   app.port(18080).multithreaded().run();
