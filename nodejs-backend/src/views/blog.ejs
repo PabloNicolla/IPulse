@@ -3,63 +3,179 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <link href="/css/output.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/novablog-logo.png" />
+    <title><%= title %></title>
   </head>
   <body>
-    <h1>Image Upload and Display</h1>
-    <input type="file" id="imageInput" accept="image/*" />
-    <button onclick="uploadImage()">Upload Image</button>
-    <br />
-    <!-- Image tag for displaying the processed image -->
-    <img
-      id="displayedImage"
-      src=""
-      alt="Processed Image"
-      style="margin-top: 20px"
-    />
+    <%- include('partials/header', {user: user}) %>
+    <!-- Page specific content goes here -->
 
-    <form id="saveImageForm" action="URL_TO_YOUR_OTHER_BACKEND" method="post">
-      <input type="hidden" name="imageName" value="processedImage.jpg" />
-      <button type="submit">Save Image</button>
-    </form>
+    <!-- search bar -->
+    <div class="flex justify-center p-8">
+      <div class="form-control w-full max-w-xl">
+        <div class="input-group flex">
+          <input
+            type="text"
+            placeholder="Search…"
+            class="input input-bordered w-full flex-grow bg-base-200 text-primary"
+            id="search-input"
+          />
 
+          <button
+            id="search-button"
+            class="btn btn-square flex-shrink-0 bg-primary text-primary-content hover:bg-primary-content hover:text-primary"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          id="search-dropdown"
+          class="dropdown hidden w-full bg-base-100 text-primary shadow-lg"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="flex justify-center">
+      <div class="join join-vertical flex flex-wrap justify-center p-8">
+        <% cards.forEach(function(card, index) { %>
+        <!-- Check to ensure only 12 cards are rendered -->
+        <div class="join-item flex p-4">
+          <div
+            class="card w-96 rounded-lg border border-base-content bg-base-300 shadow-xl"
+          >
+            <figure class="flex h-64">
+              <img
+                src="<%= card.storagePath %>"
+                class="h-full w-auto"
+                alt="Card Image"
+              />
+            </figure>
+            <div class="card-body">
+              <h2 class="card-title">
+                <%= card.imageTitle %> <% if (card.isRecent) { %>
+                <div class="badge badge-secondary">NEW</div>
+                <% } %>
+              </h2>
+              <p><%= card.description %></p>
+              <div class="card-actions justify-end">
+                <% card.tags.forEach(function(badge) { %>
+                <div class="badge badge-outline"><%= badge %></div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <a id="totalPagesNumber" value="<%- totalPages %>" hidden></a>
+
+    <%- include('partials/footer') %>
+
+    <script type="module" src="/js/search-form.js"></script>
+    <script type="module" src="/js/search-recommendations.js"></script>
     <script>
-      function uploadImage() {
-        const input = document.getElementById("imageInput");
-        const filterType = "grayscale"; // Example additional parameter
-        if (!input.files.length) {
-          alert("Please select an image to upload.");
-          return;
+      document.addEventListener("DOMContentLoaded", function () {
+        let currentPage = 1;
+        const totalPages = parseInt(
+          document.getElementById("totalPagesNumber").getAttribute("value"),
+        );
+        let isLoading = false; // Initialize loading flag
+
+        window.onscroll = function () {
+          if (
+            window.innerHeight + window.pageYOffset >=
+              document.body.offsetHeight - 200 &&
+            !isLoading // Check if not currently loading
+          ) {
+            // Load more content if there are more pages
+            if (currentPage < totalPages) {
+              currentPage++;
+              console.log("Loading more cards for page", currentPage);
+              loadMoreCards(currentPage);
+            }
+          }
+        };
+
+        function loadMoreCards(page) {
+          if (isLoading) return; // Exit if already loading
+          isLoading = true; // Set flag to lock loading
+
+          fetch(`/blog?q=<%= cQuery %>&page=${page}`, {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Append new cards to the container
+              const container = document.querySelector(".join-vertical");
+              data.images.forEach((image) => {
+                const cardElement = createCardElement(image);
+                container.appendChild(cardElement);
+              });
+              isLoading = false; // Unlock loading after appending cards
+            })
+            .catch((error) => {
+              console.error("Error loading more cards:", error);
+              isLoading = false; // Unlock loading on error
+            });
         }
 
-        const file = input.files[0];
-        const formData = new FormData();
-        formData.append("image", file);
-        formData.append("filterType", filterType); // Append additional parameter
-
-        fetch("http://localhost:8081/upload", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            console.log(response.body);
-            return response.blob(); // Convert the response to a blob
-          })
-          .then((blob) => {
-            // Create an object URL for the blob and set it as the src of the img tag
-            const imageUrl = URL.createObjectURL(blob);
-            document.getElementById("displayedImage").src = imageUrl;
-          })
-          .catch((error) => {
-            console.error(
-              "There has been a problem with your fetch operation:",
-              error,
-            );
-          });
-      }
+        function createCardElement(image) {
+          const card = document.createElement("div");
+          card.classList.add("join-item", "flex", "p-4");
+          card.innerHTML = `
+            <div
+              class="card w-96 rounded-lg border border-base-content bg-base-300 shadow-xl"
+            >
+              <figure class="flex h-64">
+                <img
+                  src="${image.storagePath}"
+                  class="h-full w-auto"
+                  alt="Card Image"
+                />
+              </figure>
+              <div class="card-body">
+                <h2 class="card-title">
+                  ${image.imageTitle} ${
+                    image.isRecent
+                      ? '<div class="badge badge-secondary">NEW</div>'
+                      : ""
+                  }
+                </h2>
+                <p>${image.description}</p>
+                <div class="card-actions justify-end">
+                  ${image.tags
+                    .map(
+                      (badge) =>
+                        `<div class="badge badge-outline">${badge}</div>`,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </div>
+          `;
+          return card;
+        }
+      });
     </script>
   </body>
 </html>

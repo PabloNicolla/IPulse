@@ -1,5 +1,5 @@
-const authService = require("../auth-service"); // Example service module for auth
-const imageService = require("../image-service"); // Example service module for images
+const authService = require("../services/auth-service");
+const imageService = require("../services/image-service");
 
 exports.getRoot = (req, res) => {
   res.redirect("/homepage");
@@ -67,10 +67,10 @@ exports.getSupportPage = (req, res) => {
 exports.getSearchPage = async (req, res) => {
   try {
     const itemsPerPage = 2;
-    let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+    const page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
     const offset = (page - 1) * itemsPerPage;
 
-    let searchCondition = {};
+    const searchCondition = {};
     if (req.query.q) {
       const search = req.query.q;
       // Using $regex to search for non-exact matches. 'i' option for case-insensitive search.

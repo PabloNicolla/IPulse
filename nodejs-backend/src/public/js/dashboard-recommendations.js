@@ -1,17 +1,16 @@
 import { handleSubmit } from "./dashboard.js";
 
-document
-  .getElementById("search-input")
-  .addEventListener("input", async function () {
-    const query = this.value;
-    if (query.length < 3) {
-      // Minimum characters before fetching recommendations
-      document.getElementById("search-dropdown").classList.add("hidden");
-      return;
-    }
-
+let debounceTimer;
+document.getElementById("search-input").addEventListener("input", function () {
+  clearTimeout(debounceTimer); // Clear the timer on every input event
+  const query = this.value;
+  if (query.length < 3) {
+    document.getElementById("search-dropdown").classList.add("hidden");
+    return;
+  }
+  debounceTimer = setTimeout(async () => {
+    // Set a new timer
     // Fetch recommendations from your Express.js backend
-    // This is a placeholder; you'll need to implement the actual fetch call based on your backend API
     const recommendations = await fetch(
       `/users/dashboard/recommendations?q=${encodeURIComponent(query)}`,
     )
@@ -34,7 +33,8 @@ document
       child.addEventListener("click", () => handleSubmit(child.textContent));
     });
     dropdown.classList.remove("hidden");
-  });
+  }, 500); // 300ms delay
+});
 
 // Add event listener to hide dropdown when not focused
 document.getElementById("search-input").addEventListener("blur", function () {

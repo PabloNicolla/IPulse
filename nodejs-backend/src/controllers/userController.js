@@ -1,5 +1,5 @@
-const authService = require("../auth-service"); // Example service module for auth
-const imageService = require("../image-service"); // Example service module for images
+const authService = require("../services/auth-service");
+const imageService = require("../services/image-service");
 
 exports.getRegisterPage = (req, res) => {
   if (req.session.user) {
@@ -80,18 +80,41 @@ exports.logout = (req, res) => {
 
 exports.getDashboardPage = async (req, res) => {
   try {
-    const images = await imageService.getImagesByUser(req.session.user.userId);
-
     const itemsPerPage = 2;
-    let page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
+    const page = req.query.page ? parseInt(req.query.page) : 1; // Default to page 1 if not provided
     const offset = (page - 1) * itemsPerPage;
 
-    const paginatedItems = images.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(images.length / itemsPerPage);
+    let searchCondition = {};
+    if (req.query.q) {
+      const search = req.query.q;
+      // Using $regex to search for non-exact matches. 'i' option for case-insensitive search.
+      searchCondition = {
+        $and: [
+          { userId: req.session.user.userId }, // Ensure creator matches the query
+          {
+            $or: [
+              { imageTitle: { $regex: search, $options: "i" } },
+              { tags: { $regex: search, $options: "i" } },
+            ],
+          },
+        ],
+      };
+    } else {
+      searchCondition = { userId: req.session.user.userId };
+    }
+
+    const images = await imageService.getImagesCustom(
+      searchCondition,
+      offset,
+      itemsPerPage,
+    );
+    const totalMatches = await imageService.getImagesCount(searchCondition);
+
+    const totalPages = Math.ceil(totalMatches / itemsPerPage);
 
     const now = new Date(); // Get the current time
     const thirtyMinutes = 5 * 60 * 60 * 1000; // 5hrs in milliseconds
-    for (img of paginatedItems) {
+    for (img of images) {
       var updatedAt = new Date(img.updatedAt); // Ensure updatedAt is a Date object
       img.isRecent = now - updatedAt < thirtyMinutes; // Compare the time difference
     }
@@ -99,7 +122,7 @@ exports.getDashboardPage = async (req, res) => {
     res.render("dashboard", {
       title: "Dashboard",
       user: req.session.user,
-      cards: paginatedItems,
+      cards: images,
       currentPage: page,
       totalPages: totalPages,
       cQuery: req.query.q,
@@ -110,12 +133,57 @@ exports.getDashboardPage = async (req, res) => {
   }
 };
 
-exports.getDashboardRecommendations = (req, res) => {
+exports.getDashboardRecommendations = async (req, res) => {
   const query = req.query.q;
-  // Implement logic to find recommendations based on the query
-  // This is just a placeholder response
-  const recommendations = ["Suggestion 1", "Suggestion 2", "Suggestion 3"];
-  res.json(recommendations);
+
+  if (!query || query.length < 3) {
+    return res.json([]); // Return empty array if query is too short or missing
+  }
+
+  const regexPattern = new RegExp(query, "i"); // Case-insensitive regex pattern based on the query
+
+  // Define your search condition using $regex for partial matching and $or to search across fields
+  const searchCondition = {
+    $and: [
+      { userId: req.session.user.userId }, // Ensure creator matches the query
+      {
+        $or: [
+          { imageTitle: { $regex: regexPattern } },
+          { tags: { $regex: regexPattern } },
+        ],
+      },
+    ],
+  };
+
+  try {
+    const recommendations = await imageService.getImagesCustom(
+      searchCondition,
+      0,
+      10,
+      true,
+    );
+
+    let formattedRecommendations = new Set(); // Use a set to avoid duplicate recommendations
+    recommendations.forEach((rec) => {
+      // Apply the regex to filter matching fields within each document
+      if (regexPattern.test(rec.imageTitle)) {
+        formattedRecommendations.add(rec.imageTitle);
+      }
+      if (regexPattern.test(rec.creator)) {
+        formattedRecommendations.add(rec.creator);
+      }
+      rec.tags.forEach((tag) => {
+        if (regexPattern.test(tag)) {
+          formattedRecommendations.add(tag);
+        }
+      });
+    });
+
+    res.json(Array.from(formattedRecommendations));
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ message: "Error fetching recommendations" });
+  }
 };
 
 exports.getProfilePage = (req, res) => {

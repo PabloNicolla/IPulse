@@ -1,5 +1,4 @@
 const redis = require("redis");
-const fs = require("fs");
 
 let redisClient;
 // let customExScriptSha;

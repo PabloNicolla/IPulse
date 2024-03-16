@@ -1,5 +1,5 @@
-const authService = require("../auth-service"); // Example service module for auth
-const imageService = require("../image-service"); // Example service module for images
+const authService = require("../services/auth-service");
+const imageService = require("../services/image-service");
 const {
   uploadStreamToCloudinary,
   uploadToCloudinary2,

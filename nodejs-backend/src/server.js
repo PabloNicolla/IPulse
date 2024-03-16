@@ -4,11 +4,11 @@ const path = require("path");
 const fs = require("fs");
 const ejs = require("ejs");
 // Local
-const mongooseInit = require("./mongoose-init");
-const authService = require("./auth-service");
-const imageService = require("./image-service");
-const blogService = require("./blog-service");
-const redisService = require("./redis-service");
+const mongooseInit = require("./services/mongoose-init");
+const authService = require("./services/auth-service");
+const imageService = require("./services/image-service");
+//const blogService = require("./services/blog-service");
+const redisService = require("./services/redis-service");
 // Safety
 const { HTTPS_PORT, HTTP_PORT } = require("./config/index");
 require("dotenv").config();
@@ -29,10 +29,12 @@ app.set("view engine", "ejs");
 const publicRoutes = require("./routes/public");
 const userRoutes = require("./routes/users");
 const imageRoutes = require("./routes/images");
+const blogRoutes = require("./routes/blog");
 
 app.use("/", publicRoutes);
 app.use("/users", userRoutes);
 app.use("/image", imageRoutes);
+app.use("/blog", blogRoutes);
 
 /* --- --- --- --- --- --- --- -- --- --- --- -- --- --- --- -- --- --- --- -- --- --- --- -- --- --- --- -- */
 

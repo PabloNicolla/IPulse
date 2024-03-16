@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const evnConfig = require("./config/index");
+const evnConfig = require("../config/index");
 
 let userSchema = new mongoose.Schema(
   {

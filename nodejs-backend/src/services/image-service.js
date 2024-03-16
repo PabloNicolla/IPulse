@@ -2,9 +2,8 @@ const mongooseInit = require("./mongoose-init");
 const { getRedisClient } = require("./redis-service");
 const {
   deleteImageFromCloudinary,
-} = require("./middleware/cloudinaryMiddleware");
+} = require("../middleware/cloudinaryMiddleware");
 const crypto = require("crypto");
-const { set } = require("mongoose");
 
 let Image;
 let User;

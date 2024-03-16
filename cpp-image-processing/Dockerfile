@@ -4,17 +4,12 @@ FROM gcc:latest
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Install CMake, make and any other dependencies
-# RUN apt-get update && apt-get install -y gcc g++ cmake make libboost-all-dev git wget
-RUN apt-get update
-RUN apt-get install g++ -y
-RUN apt-get install cmake -y
-RUN apt-get install make -y
-RUN apt-get install git -y
-RUN apt-get install wget -y
-RUN apt-get install build-essential -y
-RUN apt-get install libopencv-dev -y
-RUN apt-get install libssl-dev -y
+# Install CMake, make, and other dependencies, then clean up in the same layer to reduce the image size
+RUN apt-get update && \
+    apt-get install -y \
+    g++ cmake make git wget build-essential libopencv-dev libssl-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy your source code
 COPY src/ ./src
